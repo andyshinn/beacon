@@ -80,6 +80,7 @@ const defaultFactory: BonjourFactory = (kind) => {
   if (kind === 'udp4') return new Bonjour() as unknown as BonjourLike
   const iface = defaultIpv6InterfaceAddress()
   if (!iface) return null
+  // udp6 option shape isn't in bonjour-service's types; verified live via scripts/discover.ts (smoke harness)
   return new Bonjour({ type: 'udp6', ip: 'ff02::fb', interface: iface } as never) as unknown as BonjourLike
 }
 

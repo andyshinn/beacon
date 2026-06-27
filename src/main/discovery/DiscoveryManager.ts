@@ -60,11 +60,15 @@ export class DiscoveryManager {
     this.unsubscribe = undefined
     this.source.stop()
     this.live = false
+    this.emitStatus(false)
   }
 
   setLive(on: boolean): void {
     if (on === this.live) return
     if (on) {
+      if (!this.unsubscribe) {
+        this.unsubscribe = this.source.subscribe((e) => this.handleSourceEvent(e))
+      }
       this.source.start()
       this.startTimer()
       this.live = true

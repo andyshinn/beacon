@@ -32,6 +32,6 @@ describe('FakeSource', () => {
     const svc = makeService({ name: 'Porch', serviceType: '_http._tcp', hostname: 'porch.local.' })
     expect(svc.key).toBe('porch._http._tcp.local.')
     expect(svc.protocol).toBe('tcp')
-    expect(svc.port).toBeGreaterThan(0)
+    expect(svc.port).toBe(80)
   })
 })
