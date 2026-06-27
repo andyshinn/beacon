@@ -42,6 +42,62 @@ export class DiscoveryStore {
     return { hosts: [...this.hosts.values()], instances: [...this.instances.values()] }
   }
 
+  markDown(key: string, now: number): DiscoveryDelta {
+    const inst = this.instances.get(key)
+    if (!inst) return {}
+    const downed: Instance = { ...inst, present: false, departedAt: now }
+    this.instances.set(key, downed)
+
+    const host = this.hosts.get(inst.hostId)
+    const delta: DiscoveryDelta = { upsertInstances: [downed] }
+    if (host) {
+      const anyPresent = this.hostHasPresentInstance(host.id)
+      if (host.present !== anyPresent) {
+        const updated: Host = anyPresent
+          ? { ...host, present: true, departedAt: undefined }
+          : { ...host, present: false, departedAt: now }
+        this.hosts.set(host.id, updated)
+        delta.upsertHosts = [updated]
+      } else {
+        delta.upsertHosts = [host]
+      }
+    }
+    return delta
+  }
+
+  prune(now: number, graceMs: number): DiscoveryDelta {
+    const removeInstanceKeys: string[] = []
+    for (const inst of this.instances.values()) {
+      if (!inst.present && inst.departedAt !== undefined && inst.departedAt + graceMs <= now) {
+        removeInstanceKeys.push(inst.key)
+      }
+    }
+    for (const key of removeInstanceKeys) this.instances.delete(key)
+
+    const removeHostIds: string[] = []
+    for (const host of this.hosts.values()) {
+      const hasInstances = this.hostHasAnyInstance(host.id)
+      const expired = !host.present && host.departedAt !== undefined && host.departedAt + graceMs <= now
+      if (!hasInstances && expired) removeHostIds.push(host.id)
+    }
+    for (const id of removeHostIds) this.hosts.delete(id)
+
+    const delta: DiscoveryDelta = {}
+    if (removeInstanceKeys.length) delta.removeInstanceKeys = removeInstanceKeys
+    if (removeHostIds.length) delta.removeHostIds = removeHostIds
+    return delta
+  }
+
+  private hostHasPresentInstance(id: string): boolean {
+    for (const inst of this.instances.values()) if (inst.hostId === id && inst.present) return true
+    return false
+  }
+
+  private hostHasAnyInstance(id: string): boolean {
+    for (const inst of this.instances.values()) if (inst.hostId === id) return true
+    return false
+  }
+
   private upsertHost(hid: string, hostname: string, newAddrs: Address[], now: number): Host {
     const prev = this.hosts.get(hid)
     const merged = unionAddresses(prev?.addresses ?? [], newAddrs)

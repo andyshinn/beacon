@@ -42,7 +42,7 @@ describe('DiscoveryStore.upsert', () => {
     expect(inst.lastSeen).toBe(5000)
     expect(inst.departedAt).toBeUndefined()
     expect(delta.upsertHosts).toBeDefined()
-    const host = delta.upsertHosts[0]!
+    const host = delta.upsertHosts![0]!
     expect(host.firstSeen).toBe(1000)
   })
 
