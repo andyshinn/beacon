@@ -94,13 +94,10 @@ export class BonjourSource implements DiscoverySource {
   }
 
   start(): void {
-    const seenBrowsers = new Set<BrowserLike>()
     for (const kind of ['udp4', 'udp6'] as const) {
       const engine = this.createBonjour(kind)
       if (!engine) continue
       const browser = engine.find(null)
-      if (seenBrowsers.has(browser)) continue
-      seenBrowsers.add(browser)
       browser.on('up', (s) => this.emit({ type: 'up', service: toDiscoveredService(s) }))
       browser.on('srv-update', (s) => this.emit({ type: 'srv-update', service: toDiscoveredService(s) }))
       browser.on('txt-update', (s) => this.emit({ type: 'txt-update', service: toDiscoveredService(s) }))

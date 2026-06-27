@@ -64,7 +64,7 @@ describe('BonjourSource (injected factory)', () => {
     src.subscribe(seen)
     src.start()
     f.handlers['up']!(sampleService)
-    expect(seen).toHaveBeenCalledWith({ type: 'up', service: expect.objectContaining({ key: "andy's mac studio._airplay._tcp.local." }) })
+    expect(seen).toHaveBeenCalledWith({ type: 'up', service: expect.objectContaining({ key: "andy's mac studio._airplay._tcp.local.", serviceType: '_airplay._tcp', hostname: 'Andy-Mac-Studio.local.' }) })
   })
 
   it('maps a bonjour down event to a down SourceEvent keyed by fqdn', () => {
@@ -77,14 +77,17 @@ describe('BonjourSource (injected factory)', () => {
     expect(seen).toHaveBeenCalledWith({ type: 'down', key: "andy's mac studio._airplay._tcp.local." })
   })
 
-  it('fans update() and expire() to the browser', () => {
-    const f = fakeBonjour()
-    const src = new BonjourSource({ createBonjour: () => f.engine })
+  it('fans update() and expire() to every engine browser', () => {
+    const f4 = fakeBonjour()
+    const f6 = fakeBonjour()
+    const src = new BonjourSource({ createBonjour: (kind) => (kind === 'udp6' ? f6.engine : f4.engine) })
     src.start()
     src.update()
     src.expire()
-    expect(f.browser.update).toHaveBeenCalledTimes(1)
-    expect(f.browser.expire).toHaveBeenCalledTimes(1)
+    expect(f4.browser.update).toHaveBeenCalledTimes(1)
+    expect(f6.browser.update).toHaveBeenCalledTimes(1)
+    expect(f4.browser.expire).toHaveBeenCalledTimes(1)
+    expect(f6.browser.expire).toHaveBeenCalledTimes(1)
   })
 
   it('skips engines whose factory returns null (e.g. no IPv6)', () => {
