@@ -29,6 +29,7 @@ describe('DiscoveryStore.upsert', () => {
       { value: '172.16.20.157', family: 'ipv4' },
       { value: 'fe80::1', family: 'linklocal', zone: 'en0' },
     ])
+    expect(host.present).toBe(true)
   })
 
   it('re-sighting bumps lastSeen but keeps firstSeen, and clears departedAt', () => {
@@ -40,13 +41,16 @@ describe('DiscoveryStore.upsert', () => {
     expect(inst.firstSeen).toBe(1000)
     expect(inst.lastSeen).toBe(5000)
     expect(inst.departedAt).toBeUndefined()
+    expect(delta.upsertHosts).toBeDefined()
+    const host = delta.upsertHosts[0]!
+    expect(host.firstSeen).toBe(1000)
   })
 
   it('merges addresses from two instances on the same host (union)', () => {
     const store = new DiscoveryStore()
     store.upsert(makeService({ name: 'Mac', serviceType: '_airplay._tcp', hostname: 'mac.local.', addresses: ['10.0.0.2'] }), 1000)
     const delta = store.upsert(
-      makeService({ name: 'Mac', serviceType: '_ssh._tcp', hostname: 'mac.local.', addresses: ['10.0.0.2', '10.0.0.3'] }),
+      makeService({ name: 'Mac', serviceType: '_ssh._tcp', hostname: 'mac.local.', addresses: ['10.0.0.3'] }),
       1000,
     )
     const host = delta.upsertHosts![0]!
