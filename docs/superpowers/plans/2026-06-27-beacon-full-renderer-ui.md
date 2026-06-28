@@ -1598,7 +1598,7 @@ describe("buildDetail — host", () => {
 });
 
 describe("buildDetail — service type", () => {
-	const d = buildDetail({ kind: "service", id: "_airplay._tcp" }, ctx)!;
+	const d = buildDetail({ kind: "svc", id: "_airplay._tcp" }, ctx)!;
 	it("shows a mono name, always-on description, and an Advertised-by list", () => {
 		expect(d.nameMono).toBe(true);
 		expect(d.serviceDesc).toBe("Protocol for streaming of audio/video content");
