@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MenuCommand, MenuStatePayload } from "../../shared/ipc";
 import { useDiscoveryStore } from "../store/discoveryStore";
 import { useSettingsStore } from "../store/settingsStore";
@@ -41,6 +41,12 @@ describe("dispatchMenuCommand", () => {
 });
 
 describe("installMenu", () => {
+	beforeEach(() => {
+		useSettingsStore.getState().setMode("service");
+		useDiscoveryStore.getState().applyStatus({ live: false, scanning: false });
+		useDiscoveryStore.getState().clearSearch();
+	});
+
 	function fakeBridge() {
 		const sent: MenuStatePayload[] = [];
 		let cmd: ((c: MenuCommand) => void) | undefined;

@@ -20,13 +20,6 @@ export function installAppMenu(win: BrowserWindow): () => void {
 		canGoForward: nav().canGoForward(),
 	};
 
-	const refreshNav = (): void => {
-		if (win.isDestroyed()) return;
-		state.canGoBack = nav().canGoBack();
-		state.canGoForward = nav().canGoForward();
-		rebuild();
-	};
-
 	const rebuild = (): void => {
 		const template = buildMenuTemplate(state, {
 			platform: process.platform,
@@ -36,14 +29,25 @@ export function installAppMenu(win: BrowserWindow): () => void {
 			},
 			onBack: () => {
 				if (nav().canGoBack()) nav().goBack();
+				// Explicit refreshNav() is intentional: the OS-gesture / app-command Back/Forward
+				// paths wired in main.ts bypass this closure, so rebuild is also called here.
+				// It is idempotent and cheap.
 				refreshNav();
 			},
 			onForward: () => {
 				if (nav().canGoForward()) nav().goForward();
+				// Same reasoning as onBack above.
 				refreshNav();
 			},
 		});
 		Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+	};
+
+	const refreshNav = (): void => {
+		if (win.isDestroyed()) return;
+		state.canGoBack = nav().canGoBack();
+		state.canGoForward = nav().canGoForward();
+		rebuild();
 	};
 
 	const onMenuState = (_e: unknown, payload: MenuStatePayload): void => {
