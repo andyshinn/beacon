@@ -22,10 +22,11 @@ export function parseInstanceName(
 	const m = INSTANCE_RE.exec(normalizeDot(fqdn));
 	if (!m) return null;
 	const [, instance, app, proto, protocol, domain] = m;
+	if (!instance || !app || !proto || !protocol || !domain) return null;
 	return {
-		instance: instance!,
+		instance,
 		serviceType: `${app}.${proto}`,
 		protocol: protocol as "tcp" | "udp",
-		domain: domain!,
+		domain,
 	};
 }
