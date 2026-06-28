@@ -31,6 +31,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+	console.log("[beacon] main process ready");
 	createWindow();
 	app.on("activate", () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
