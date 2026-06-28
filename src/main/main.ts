@@ -64,20 +64,28 @@ function createWindow(): void {
 			contextIsolation: true,
 			sandbox: true,
 			nodeIntegration: false,
+			// Electron only emits the macOS "swipe" event when scrollBounce is enabled;
+			// without it the win.on("swipe", …) handler below never fires.
+			scrollBounce: true,
 		},
 	});
 	if (saved.isMaximized) win.maximize();
 	manageWindow(win, io);
 	// OS-level navigation gestures funnel into the same Chromium history stack the
 	// renderer drives via the History API, so each fires the renderer's popstate.
-	const navHistory = () => win.webContents.navigationHistory;
+	const goBack = () => {
+		if (win.webContents.navigationHistory.canGoBack()) win.webContents.navigationHistory.goBack();
+	};
+	const goForward = () => {
+		if (win.webContents.navigationHistory.canGoForward()) win.webContents.navigationHistory.goForward();
+	};
 	win.on("app-command", (_e, command) => {
-		if (command === "browser-backward" && navHistory().canGoBack()) navHistory().goBack();
-		else if (command === "browser-forward" && navHistory().canGoForward()) navHistory().goForward();
+		if (command === "browser-backward") goBack();
+		else if (command === "browser-forward") goForward();
 	});
 	win.on("swipe", (_e, direction) => {
-		if (direction === "left" && navHistory().canGoBack()) navHistory().goBack();
-		else if (direction === "right" && navHistory().canGoForward()) navHistory().goForward();
+		if (direction === "left") goBack();
+		else if (direction === "right") goForward();
 	});
 	registerDiscoveryIpc(win);
 	if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
