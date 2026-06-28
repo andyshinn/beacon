@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { clampPaneWidth, PANE_DEFAULT } from "../lib/paneWidth";
 
 export type Lens = "service" | "host" | "ip" | "all";
 export type SortBy = "name" | "ip" | "lastseen";
@@ -12,6 +13,7 @@ interface SettingsState {
 	showDesc: boolean;
 	showV6: boolean;
 	showLinkLocal: boolean;
+	listPaneWidth: number;
 	setAppearance: (a: Appearance) => void;
 	toggleAppearance: () => void;
 	setMode: (m: Lens) => void;
@@ -19,6 +21,7 @@ interface SettingsState {
 	toggleShowDesc: () => void;
 	toggleShowV6: () => void;
 	toggleShowLinkLocal: () => void;
+	setListPaneWidth: (px: number) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -30,6 +33,7 @@ export const useSettingsStore = create<SettingsState>()(
 			showDesc: true,
 			showV6: true,
 			showLinkLocal: true,
+			listPaneWidth: PANE_DEFAULT,
 			setAppearance: (appearance) => set({ appearance }),
 			toggleAppearance: () => set((s) => ({ appearance: s.appearance === "dark" ? "light" : "dark" })),
 			setMode: (mode) => set({ mode }),
@@ -37,6 +41,7 @@ export const useSettingsStore = create<SettingsState>()(
 			toggleShowDesc: () => set((s) => ({ showDesc: !s.showDesc })),
 			toggleShowV6: () => set((s) => ({ showV6: !s.showV6 })),
 			toggleShowLinkLocal: () => set((s) => ({ showLinkLocal: !s.showLinkLocal })),
+			setListPaneWidth: (px) => set({ listPaneWidth: clampPaneWidth(px) }),
 		}),
 		{ name: "beacon.settings", version: 1 },
 	),

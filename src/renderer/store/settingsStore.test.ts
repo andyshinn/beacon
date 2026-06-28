@@ -11,6 +11,7 @@ beforeEach(() => {
 		showDesc: true,
 		showV6: true,
 		showLinkLocal: true,
+		listPaneWidth: 384,
 	});
 });
 
@@ -31,5 +32,11 @@ describe("settingsStore", () => {
 		useSettingsStore.getState().toggleShowV6();
 		expect(useSettingsStore.getState().mode).toBe("ip");
 		expect(useSettingsStore.getState().showV6).toBe(false);
+	});
+	it("setListPaneWidth clamps and stores the width", () => {
+		useSettingsStore.getState().setListPaneWidth(100);
+		expect(useSettingsStore.getState().listPaneWidth).toBe(260);
+		useSettingsStore.getState().setListPaneWidth(400);
+		expect(useSettingsStore.getState().listPaneWidth).toBe(400);
 	});
 });
