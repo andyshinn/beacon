@@ -1,58 +1,104 @@
 import { create } from "zustand";
-import type { DiscoveryDelta, DiscoverySnapshot, Host, Instance } from "../../shared/types";
+import type { DiscoveryDelta, DiscoverySnapshot, DiscoveryStatus, Host, Instance } from "../../shared/types";
 
-export interface InstanceRow {
-	key: string;
-	name: string;
-	serviceType: string;
-	primaryIp: string | null;
+export type SelectionKind = "inst" | "host" | "svc" | "ip";
+export interface Selection {
+	kind: SelectionKind;
+	id: string;
 }
 
 interface DiscoveryState {
 	hosts: Map<string, Host>;
 	instances: Map<string, Instance>;
-	rows: InstanceRow[];
+	status: DiscoveryStatus;
+	selection: Selection | null;
+	query: string;
+	expanded: Set<string>;
+	pausedAt: number;
+	now: number;
+	toast: string | null;
 	applySnapshot: (snapshot: DiscoverySnapshot) => void;
 	applyDelta: (delta: DiscoveryDelta) => void;
+	applyStatus: (status: DiscoveryStatus) => void;
+	tick: (now: number) => void;
+	selectInst: (id: string) => void;
+	selectSvc: (id: string) => void;
+	selectHost: (id: string) => void;
+	selectIp: (id: string) => void;
+	toggleExpand: (id: string) => void;
+	expandAll: (ids: string[]) => void;
+	collapseAll: () => void;
+	setQuery: (q: string) => void;
+	clearSearch: () => void;
+	showToast: (msg: string) => void;
+	dismissToast: () => void;
 }
 
-const FAMILY_ORDER = { ipv4: 0, ipv6: 1, linklocal: 2, loopback: 3 } as const;
+let toastTimer: ReturnType<typeof setTimeout> | undefined;
 
-function primaryIp(host: Host | undefined): string | null {
-	if (!host || host.addresses.length === 0) return null;
-	const best = [...host.addresses].sort((a, b) => FAMILY_ORDER[a.family] - FAMILY_ORDER[b.family])[0];
-	return best ? best.value : null;
-}
-
-function buildRows(hosts: Map<string, Host>, instances: Map<string, Instance>): InstanceRow[] {
-	return [...instances.values()]
-		.map((i) => ({
-			key: i.key,
-			name: i.name,
-			serviceType: i.serviceType,
-			primaryIp: primaryIp(hosts.get(i.hostId)),
-		}))
-		.sort((a, b) => a.name.localeCompare(b.name) || a.serviceType.localeCompare(b.serviceType));
-}
-
-export const useDiscoveryStore = create<DiscoveryState>((set, get) => ({
+export const useDiscoveryStore = create<DiscoveryState>((set) => ({
 	hosts: new Map(),
 	instances: new Map(),
-	rows: [],
-	applySnapshot: (snapshot) => {
-		const hosts = new Map(snapshot.hosts.map((h) => [h.id, h] as const));
-		const instances = new Map(snapshot.instances.map((i) => [i.key, i] as const));
-		set({ hosts, instances, rows: buildRows(hosts, instances) });
+	status: { live: false, scanning: false },
+	selection: null,
+	query: "",
+	expanded: new Set(),
+	pausedAt: 0,
+	now: 0,
+	toast: null,
+
+	applySnapshot: (snapshot) =>
+		set(() => ({
+			hosts: new Map(snapshot.hosts.map((h) => [h.id, h])),
+			instances: new Map(snapshot.instances.map((i) => [i.key, i])),
+		})),
+
+	applyDelta: (delta) =>
+		set((s) => {
+			const hosts = new Map(s.hosts);
+			const instances = new Map(s.instances);
+			for (const h of delta.upsertHosts ?? []) hosts.set(h.id, h);
+			for (const id of delta.removeHostIds ?? []) hosts.delete(id);
+			for (const i of delta.upsertInstances ?? []) instances.set(i.key, i);
+			for (const k of delta.removeInstanceKeys ?? []) instances.delete(k);
+			return { hosts, instances };
+		}),
+
+	applyStatus: (status) =>
+		set((s) => {
+			let pausedAt = s.pausedAt;
+			if (status.live) pausedAt = 0;
+			else if (pausedAt === 0) pausedAt = s.now;
+			return { status, pausedAt };
+		}),
+
+	tick: (now) => set({ now }),
+
+	selectInst: (id) => set({ selection: { kind: "inst", id } }),
+	selectSvc: (id) => set((s) => ({ selection: { kind: "svc", id }, expanded: new Set(s.expanded).add(`svc:${id}`) })),
+	selectHost: (id) => set((s) => ({ selection: { kind: "host", id }, expanded: new Set(s.expanded).add(`host:${id}`) })),
+	selectIp: (id) => set({ selection: { kind: "ip", id } }),
+
+	toggleExpand: (id) =>
+		set((s) => {
+			const next = new Set(s.expanded);
+			if (next.has(id)) next.delete(id);
+			else next.add(id);
+			return { expanded: next };
+		}),
+	expandAll: (ids) => set({ expanded: new Set(ids) }),
+	collapseAll: () => set({ expanded: new Set() }),
+
+	setQuery: (q) => set({ query: q }),
+	clearSearch: () => set({ query: "" }),
+
+	showToast: (msg) => {
+		set({ toast: msg });
+		if (toastTimer) clearTimeout(toastTimer);
+		toastTimer = setTimeout(() => set({ toast: null }), 1900);
 	},
-	applyDelta: (delta) => {
-		const hosts = new Map(get().hosts);
-		const instances = new Map(get().instances);
-		for (const h of delta.upsertHosts ?? []) hosts.set(h.id, h);
-		for (const id of delta.removeHostIds ?? []) hosts.delete(id);
-		for (const i of delta.upsertInstances ?? []) instances.set(i.key, i);
-		for (const k of delta.removeInstanceKeys ?? []) instances.delete(k);
-		set({ hosts, instances, rows: buildRows(hosts, instances) });
+	dismissToast: () => {
+		if (toastTimer) clearTimeout(toastTimer);
+		set({ toast: null });
 	},
 }));
-
-export const selectRows = (s: DiscoveryState): InstanceRow[] => s.rows;
