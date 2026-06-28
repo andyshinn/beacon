@@ -26,6 +26,7 @@ interface DiscoveryState {
 	selectSvc: (id: string) => void;
 	selectHost: (id: string) => void;
 	selectIp: (id: string) => void;
+	clearSelection: () => void;
 	toggleExpand: (id: string) => void;
 	expandAll: (ids: string[]) => void;
 	collapseAll: () => void;
@@ -86,6 +87,7 @@ export const useDiscoveryStore = create<DiscoveryState>((set) => ({
 	selectSvc: (id) => set((s) => ({ selection: { kind: "svc", id }, expanded: new Set(s.expanded).add(`svc:${id}`) })),
 	selectHost: (id) => set((s) => ({ selection: { kind: "host", id }, expanded: new Set(s.expanded).add(`host:${id}`) })),
 	selectIp: (id) => set({ selection: { kind: "ip", id } }),
+	clearSelection: () => set({ selection: null }),
 
 	toggleExpand: (id) =>
 		set((s) => {
