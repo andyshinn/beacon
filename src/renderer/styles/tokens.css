@@ -1,0 +1,176 @@
+/* Bespoke surfaces (no clean Radix token) + fixed "comfortable" density. */
+:root {
+	--app-bg: #0d0d0f;
+	--surface-panel: #161618;
+	--surface-toolbar: #1e1e21;
+	--surface-menu: #161618;
+	--row-h: 30px;
+	--list-fs: 13px;
+	--row-pad: 10px;
+}
+
+.bcn-app {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	overflow: hidden;
+	background: var(--app-bg);
+	color: var(--gray-12);
+	font-size: var(--list-fs);
+}
+
+.bcn-toolbar {
+	flex: 0 0 auto;
+	height: 46px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 12px;
+	background: var(--surface-toolbar);
+	border-bottom: 1px solid var(--gray-a6);
+	-webkit-app-region: drag;
+}
+.bcn-app[data-platform="mac"] .bcn-toolbar {
+	padding-left: 76px;
+}
+.bcn-toolbar button,
+.bcn-toolbar input,
+.bcn-toolbar a,
+.bcn-toolbar [role="combobox"],
+.bcn-no-drag {
+	-webkit-app-region: no-drag;
+}
+
+.bcn-body {
+	flex: 1;
+	display: flex;
+	min-height: 0;
+}
+.bcn-list-pane {
+	flex: 0 0 384px;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	background: var(--surface-panel);
+	border-right: 1px solid var(--gray-a6);
+}
+.bcn-detail-pane {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	background: var(--app-bg);
+}
+.bcn-status-bar {
+	flex: 0 0 auto;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 0 14px;
+	background: var(--surface-toolbar);
+	border-top: 1px solid var(--gray-a6);
+	font-size: 11.5px;
+	color: var(--gray-10);
+}
+
+.bcn-logo {
+	width: 18px;
+	height: 18px;
+	border-radius: 6px;
+	background: var(--accent-9);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.bcn-logo::after {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+.bcn-title {
+	font-weight: 650;
+	font-size: 13.5px;
+	letter-spacing: 0.01em;
+}
+
+/* Dimmable scroll panels (staleness tint). */
+.bcn-scroll {
+	flex: 1;
+	overflow-y: auto;
+	transition:
+		opacity 0.8s,
+		filter 0.8s;
+}
+.bcn-app[data-staleness="aging"] .bcn-scroll {
+	opacity: 0.72;
+}
+.bcn-app[data-staleness="stale"] .bcn-scroll {
+	opacity: 0.5;
+	filter: grayscale(0.4);
+}
+.bcn-scroll::-webkit-scrollbar {
+	width: 11px;
+}
+.bcn-scroll::-webkit-scrollbar-thumb {
+	background: var(--gray-a6);
+	border-radius: 8px;
+	border: 3px solid transparent;
+	background-clip: padding-box;
+}
+.bcn-scroll::-webkit-scrollbar-thumb:hover {
+	background: var(--gray-a8);
+	border: 3px solid transparent;
+	background-clip: padding-box;
+}
+
+@keyframes bcn-liveplus {
+	0% {
+		box-shadow: 0 0 0 0 var(--green-a3);
+	}
+	70% {
+		box-shadow: 0 0 0 5px transparent;
+	}
+	100% {
+		box-shadow: 0 0 0 0 transparent;
+	}
+}
+@keyframes bcn-amberpulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(255, 197, 61, 0.35);
+	}
+	70% {
+		box-shadow: 0 0 0 5px transparent;
+	}
+	100% {
+		box-shadow: 0 0 0 0 transparent;
+	}
+}
+@keyframes bcn-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+@keyframes bcn-popin {
+	from {
+		opacity: 0;
+		transform: translateX(-50%) translateY(8px) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0) scale(1);
+	}
+}
+@keyframes bcn-menuin {
+	from {
+		opacity: 0;
+		transform: translateY(-4px) scale(0.98);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}

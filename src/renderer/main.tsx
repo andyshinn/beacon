@@ -2,6 +2,7 @@ import { Theme } from "@radix-ui/themes";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "@radix-ui/themes/styles.css";
+import "./styles/tokens.css";
 import { App } from "./App";
 import { useDiscoveryStore } from "./store/discoveryStore";
 
