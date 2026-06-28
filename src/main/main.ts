@@ -68,6 +68,17 @@ function createWindow(): void {
 	});
 	if (saved.isMaximized) win.maximize();
 	manageWindow(win, io);
+	// OS-level navigation gestures funnel into the same Chromium history stack the
+	// renderer drives via the History API, so each fires the renderer's popstate.
+	const navHistory = () => win.webContents.navigationHistory;
+	win.on("app-command", (_e, command) => {
+		if (command === "browser-backward" && navHistory().canGoBack()) navHistory().goBack();
+		else if (command === "browser-forward" && navHistory().canGoForward()) navHistory().goForward();
+	});
+	win.on("swipe", (_e, direction) => {
+		if (direction === "left" && navHistory().canGoBack()) navHistory().goBack();
+		else if (direction === "right" && navHistory().canGoForward()) navHistory().goForward();
+	});
 	registerDiscoveryIpc(win);
 	if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
 		void win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
