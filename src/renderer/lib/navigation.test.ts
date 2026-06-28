@@ -86,6 +86,27 @@ describe("installNavigation", () => {
 		dispose();
 	});
 
+	it.each([
+		{ kind: "inst", id: "web" },
+		{ kind: "svc", id: "_http._tcp" },
+		{ kind: "ip", id: "10.0.0.2" },
+	] as const)("restores a $kind selection on popstate via the right dispatch", (selection) => {
+		const h = fakeHistory();
+		const dispose = installNavigation({ history: h.history, win: window });
+		popstate({ mode: "service", selection });
+		// A mis-wired dispatch (e.g. svc -> selectInst) would leave a different kind here.
+		expect(useDiscoveryStore.getState().selection).toEqual(selection);
+		dispose();
+	});
+
+	it("expands the service group when a svc selection is restored on popstate", () => {
+		const h = fakeHistory();
+		const dispose = installNavigation({ history: h.history, win: window });
+		popstate({ mode: "service", selection: { kind: "svc", id: "_http._tcp" } });
+		expect(useDiscoveryStore.getState().expanded.has("svc:_http._tcp")).toBe(true);
+		dispose();
+	});
+
 	it("updates the baseline on apply so a matching user change does not re-push", () => {
 		const h = fakeHistory();
 		const dispose = installNavigation({ history: h.history, win: window });
