@@ -281,7 +281,7 @@ and spacing is unchanged.
 - `src/renderer/components/rows/Rows.module.css` (chip ellipsis)
 - `src/renderer/components/rows/FlatRow.module.css` (chip ellipsis)
 - `src/renderer/lib/selectors.ts` (`buildHostTree` subtitle/chip) + test
-- `src/renderer/store/settingsStore.ts` (`listPaneWidth`, version bump) + test
+- `src/renderer/store/settingsStore.ts` (`listPaneWidth`, no version bump) + test
 - `src/renderer/App.tsx` (inline pane width + divider)
 - `src/renderer/styles/tokens.css` (`.bcn-list-pane` flex)
 - `src/main/main.ts` (window state wiring + nav gesture handlers)
