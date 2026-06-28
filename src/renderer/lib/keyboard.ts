@@ -21,6 +21,18 @@ export function installKeyboard(): () => void {
 			}
 			return;
 		}
+		if (e.metaKey || e.ctrlKey) {
+			if (e.key === "[" || e.key === "ArrowLeft") {
+				e.preventDefault();
+				window.history.back();
+				return;
+			}
+			if (e.key === "]" || e.key === "ArrowRight") {
+				e.preventDefault();
+				window.history.forward();
+				return;
+			}
+		}
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
 
 		if (e.key === " " || e.key === "p") {

@@ -45,4 +45,38 @@ describe("installKeyboard", () => {
 		key({ key: "r" });
 		expect(window.beacon.rescan).not.toHaveBeenCalled();
 	});
+	it("Cmd+[ goes back and Cmd+] goes forward", () => {
+		const back = vi.spyOn(window.history, "back").mockImplementation(() => {});
+		const forward = vi.spyOn(window.history, "forward").mockImplementation(() => {});
+		const off = installKeyboard();
+		key({ key: "[", metaKey: true });
+		expect(back).toHaveBeenCalledTimes(1);
+		key({ key: "]", metaKey: true });
+		expect(forward).toHaveBeenCalledTimes(1);
+		off();
+		back.mockRestore();
+		forward.mockRestore();
+	});
+	it("Cmd+ArrowLeft/ArrowRight navigate history", () => {
+		const back = vi.spyOn(window.history, "back").mockImplementation(() => {});
+		const forward = vi.spyOn(window.history, "forward").mockImplementation(() => {});
+		const off = installKeyboard();
+		key({ key: "ArrowLeft", metaKey: true });
+		key({ key: "ArrowRight", metaKey: true });
+		expect(back).toHaveBeenCalledTimes(1);
+		expect(forward).toHaveBeenCalledTimes(1);
+		off();
+		back.mockRestore();
+		forward.mockRestore();
+	});
+	it("does not navigate history while typing in the search field", () => {
+		const back = vi.spyOn(window.history, "back").mockImplementation(() => {});
+		const off = installKeyboard();
+		const input = document.getElementById("beacon-search") as HTMLInputElement;
+		input.focus();
+		input.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "[", metaKey: true }));
+		expect(back).not.toHaveBeenCalled();
+		off();
+		back.mockRestore();
+	});
 });
