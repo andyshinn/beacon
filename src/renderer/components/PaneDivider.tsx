@@ -1,4 +1,5 @@
 import { type PointerEvent as ReactPointerEvent, useRef } from "react";
+import { PANE_MAX, PANE_MIN } from "../lib/paneWidth";
 import { useSettingsStore } from "../store/settingsStore";
 import styles from "./PaneDivider.module.css";
 
@@ -31,6 +32,8 @@ export function PaneDivider() {
 			role="separator"
 			aria-orientation="vertical"
 			aria-label="Resize list pane"
+			aria-valuemin={PANE_MIN}
+			aria-valuemax={PANE_MAX}
 			aria-valuenow={listPaneWidth}
 			tabIndex={0}
 			onPointerDown={onPointerDown}
