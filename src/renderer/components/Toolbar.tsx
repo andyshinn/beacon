@@ -32,9 +32,10 @@ export function Toolbar() {
 			<LiveToggle />
 			<SegmentedControl.Root
 				size="1"
+				variant="classic"
 				value={mode}
 				onValueChange={(v) => setMode(v as Lens)}
-				className={`${styles.segmented} bcn-no-drag`}
+				className="bcn-no-drag"
 			>
 				{SEGMENTS.map((s) => (
 					<SegmentedControl.Item key={s.value} value={s.value}>
