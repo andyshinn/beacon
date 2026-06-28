@@ -48,7 +48,7 @@ describe("StatusBar", () => {
 		expect(screen.getByText("Updated just now")).toBeTruthy();
 	});
 	it("shows a stale snapshot label when paused beyond the stale threshold", () => {
-		useDiscoveryStore.setState({ status: { live: false, scanning: false }, pausedAt: 0, now: 15000 });
+		useDiscoveryStore.setState({ status: { live: false, scanning: false }, pausedAt: 1000, now: 16000 });
 		render(<StatusBar />);
 		expect(screen.getByText("Snapshot stale · 0:15 old")).toBeTruthy();
 	});

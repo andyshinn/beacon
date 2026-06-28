@@ -27,7 +27,7 @@ export function StatusBar() {
 		});
 	}, [instances, hosts, query, showV6, showLinkLocal, now]);
 
-	const pausedAgeS = status.live ? 0 : Math.floor((now - pausedAt) / 1000);
+	const pausedAgeS = status.live || pausedAt === 0 ? 0 : Math.floor((now - pausedAt) / 1000);
 	const stale = staleness(status.live, pausedAgeS);
 	const dotClass = status.live ? styles.dotLive : stale === "stale" ? styles.dotStale : styles.dotPaused;
 	const label = status.live ? "Live" : "Paused";
