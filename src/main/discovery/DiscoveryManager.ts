@@ -92,14 +92,25 @@ export class DiscoveryManager {
 
 	rescan(): void {
 		this.source.update();
-		this.emitStatus(true);
-		if (this.scanTimer) clearTimeout(this.scanTimer);
-		this.scanTimer = setTimeout(() => this.emitStatus(false), this.scanWindowMs);
+		this.scanBlip();
+	}
+
+	restartSource(): void {
+		if (!this.live) return;
+		this.source.stop();
+		this.source.start();
+		this.scanBlip();
 	}
 
 	resolve(_key: string): void {
 		// v1: a targeted resolve is a network re-query; the engine re-queries all.
 		this.source.update();
+	}
+
+	private scanBlip(): void {
+		this.emitStatus(true);
+		if (this.scanTimer) clearTimeout(this.scanTimer);
+		this.scanTimer = setTimeout(() => this.emitStatus(false), this.scanWindowMs);
 	}
 
 	getSnapshot(): DiscoverySnapshot {

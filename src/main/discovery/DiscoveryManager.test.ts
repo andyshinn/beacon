@@ -163,4 +163,36 @@ describe("DiscoveryManager", () => {
 		mgr.setLive(false);
 		expect(mgr.getStatus()).toEqual({ live: false, scanning: false });
 	});
+
+	it("restartSource stops then restarts the source while live, with a scanning blip", () => {
+		const source = new FakeSource();
+		const { events, onEvent } = collector();
+		const mgr = new DiscoveryManager({ source, onEvent, scanWindowMs: 1200 });
+		mgr.start();
+		expect(source.startCalls).toBe(1);
+
+		mgr.restartSource();
+
+		expect(source.stopCalls).toBe(1);
+		expect(source.startCalls).toBe(2);
+		expect(source.started).toBe(true);
+		expect(events).toContainEqual({ type: "status", status: { live: true, scanning: true } });
+		vi.advanceTimersByTime(1200);
+		expect(events).toContainEqual({ type: "status", status: { live: true, scanning: false } });
+	});
+
+	it("restartSource is a no-op when paused", () => {
+		const source = new FakeSource();
+		const { onEvent } = collector();
+		const mgr = new DiscoveryManager({ source, onEvent });
+		mgr.start();
+		mgr.setLive(false);
+		const stops = source.stopCalls;
+		const starts = source.startCalls;
+
+		mgr.restartSource();
+
+		expect(source.stopCalls).toBe(stops);
+		expect(source.startCalls).toBe(starts);
+	});
 });

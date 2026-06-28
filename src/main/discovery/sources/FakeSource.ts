@@ -3,15 +3,19 @@ import { instanceKey } from "../identity";
 
 export class FakeSource implements DiscoverySource {
 	started = false;
+	startCalls = 0;
+	stopCalls = 0;
 	updateCalls = 0;
 	expireCalls = 0;
 	private listeners = new Set<(event: SourceEvent) => void>();
 
 	start(): void {
 		this.started = true;
+		this.startCalls++;
 	}
 	stop(): void {
 		this.started = false;
+		this.stopCalls++;
 	}
 	update(): void {
 		this.updateCalls++;
