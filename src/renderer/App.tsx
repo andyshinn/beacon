@@ -1,3 +1,4 @@
+import { ListPane } from "./components/ListPane";
 import { Toolbar } from "./components/Toolbar";
 
 export function App() {
@@ -8,7 +9,9 @@ export function App() {
 				<Toolbar />
 			</header>
 			<div className="bcn-body">
-				<section className="bcn-list-pane" />
+				<section className="bcn-list-pane">
+					<ListPane />
+				</section>
 				<section className="bcn-detail-pane" />
 			</div>
 			<footer className="bcn-status-bar" />
