@@ -2231,7 +2231,7 @@ export function Toolbar() {
 				</span>
 			</div>
 			<LiveToggle />
-			<SegmentedControl.Root size="1" value={mode} onValueChange={(v) => setMode(v as Lens)} className={styles.segmented}>
+			<SegmentedControl.Root size="1" value={mode} onValueChange={(v) => setMode(v as Lens)} className={`${styles.segmented} bcn-no-drag`}>
 				{SEGMENTS.map((s) => (
 					<SegmentedControl.Item key={s.value} value={s.value}>
 						{s.label}
@@ -2470,7 +2470,7 @@ export function ExportMenu() {
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content style={{ width: 180 }}>
 				{OPTIONS.map((o) => (
-					<DropdownMenu.Item key={o.kind} onSelect={() => exportAs(o.kind)}>
+					<DropdownMenu.Item key={o.kind} onSelect={() => void exportAs(o.kind)}>
 						<span style={{ fontFamily: "var(--code-font-family)", fontSize: 10, fontWeight: 700, color: "var(--gray-10)", width: 30 }}>{o.ext}</span>
 						{o.label}
 					</DropdownMenu.Item>
