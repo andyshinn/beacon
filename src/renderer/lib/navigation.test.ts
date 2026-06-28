@@ -86,6 +86,17 @@ describe("installNavigation", () => {
 		dispose();
 	});
 
+	it("updates the baseline on apply so a matching user change does not re-push", () => {
+		const h = fakeHistory();
+		const dispose = installNavigation({ history: h.history, win: window });
+		useSettingsStore.getState().setMode("host"); // one push
+		expect(h.pushed).toHaveLength(1);
+		popstate({ mode: "ip", selection: null }); // applies mode=ip; baseline becomes { ip, null }
+		useSettingsStore.getState().setMode("ip"); // same as just-applied location
+		expect(h.pushed).toHaveLength(1); // baseline was updated on apply -> no spurious push
+		dispose();
+	});
+
 	it("stops pushing after dispose", () => {
 		const h = fakeHistory();
 		const dispose = installNavigation({ history: h.history, win: window });

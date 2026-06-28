@@ -51,9 +51,12 @@ export function installNavigation(deps: { history?: History; win?: Window } = {}
 	const onPopState = (e: PopStateEvent): void => {
 		const loc = (e.state as NavLocation | null) ?? { mode: "service", selection: null };
 		applying = true;
-		applyLocation(loc);
-		last = currentLocation();
-		applying = false;
+		try {
+			applyLocation(loc);
+			last = currentLocation();
+		} finally {
+			applying = false;
+		}
 	};
 
 	const unsubMode = useSettingsStore.subscribe(maybePush);
