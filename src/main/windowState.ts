@@ -50,14 +50,15 @@ export function manageWindow(win: BrowserWindow, io: WindowStateIo): void {
 	let timer: ReturnType<typeof setTimeout> | undefined;
 
 	const save = (): void => {
+		const maximized = win.isMaximized();
 		// While maximized, persist the underlying normal bounds so un-maximize restores correctly.
-		const bounds = win.isMaximized() ? win.getNormalBounds() : win.getBounds();
+		const bounds = maximized ? win.getNormalBounds() : win.getBounds();
 		const state: WindowState = {
 			width: bounds.width,
 			height: bounds.height,
 			x: bounds.x,
 			y: bounds.y,
-			isMaximized: win.isMaximized(),
+			isMaximized: maximized,
 		};
 		io.write(JSON.stringify(state));
 	};
