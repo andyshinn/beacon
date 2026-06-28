@@ -2,6 +2,7 @@ import { type BrowserWindow, ipcMain, shell } from "electron";
 import { IPC } from "../../shared/ipc";
 import type { ManagerEvent } from "../discovery/DiscoveryManager";
 import { DiscoveryManager } from "../discovery/DiscoveryManager";
+import { LocalNetworkHealthCheck } from "../discovery/permissionHealth";
 import { BonjourSource } from "../discovery/sources/BonjourSource";
 
 export function registerDiscoveryIpc(win: BrowserWindow): void {
@@ -23,10 +24,14 @@ export function registerDiscoveryIpc(win: BrowserWindow): void {
 		if (e.type === "snapshot") push(IPC.snapshot, e.snapshot);
 		else if (e.type === "delta") push(IPC.delta, e.delta);
 		else if (e.type === "status") push(IPC.status, e.status);
-		// "health" handling wired in Task 4
+		else push(IPC.health, e.health);
 	};
 
-	const manager = new DiscoveryManager({ source: new BonjourSource(), onEvent });
+	const manager = new DiscoveryManager({
+		source: new BonjourSource(),
+		onEvent,
+		healthCheck: new LocalNetworkHealthCheck({ enabled: process.platform === "darwin" }),
+	});
 
 	// Commands. NOTE: ipcMain.handle is process-global while the manager is per-window.
 	// Beacon is single-window; the "closed" cleanup below removes these handlers, and
@@ -41,6 +46,10 @@ export function registerDiscoveryIpc(win: BrowserWindow): void {
 	ipcMain.handle(IPC.getSnapshot, () => manager.getSnapshot());
 	ipcMain.handle(IPC.openExternal, async (_e, url: unknown) => {
 		if (typeof url === "string" && /^https?:\/\//i.test(url)) await shell.openExternal(url);
+	});
+	ipcMain.handle(IPC.openLocalNetworkSettings, async () => {
+		// macOS deep link to System Settings → Privacy & Security → Local Network.
+		await shell.openExternal("x-apple.systempreferences:com.apple.preference.security?Privacy_LocalNetwork");
 	});
 
 	// Readiness: buffer until first load; re-snapshot on reload.
@@ -64,7 +73,14 @@ export function registerDiscoveryIpc(win: BrowserWindow): void {
 
 	win.on("closed", () => {
 		manager.stop();
-		for (const ch of [IPC.rescan, IPC.setLive, IPC.resolve, IPC.getSnapshot, IPC.openExternal]) {
+		for (const ch of [
+			IPC.rescan,
+			IPC.setLive,
+			IPC.resolve,
+			IPC.getSnapshot,
+			IPC.openExternal,
+			IPC.openLocalNetworkSettings,
+		]) {
 			ipcMain.removeHandler(ch);
 		}
 	});
