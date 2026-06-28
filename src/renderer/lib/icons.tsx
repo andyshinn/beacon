@@ -63,8 +63,8 @@ export function ViewOptions({ size = 15, className }: IconProps): JSX.Element {
 	return (
 		<svg width={size} height={size} viewBox="0 0 15 15" fill="none" className={className} aria-hidden={true}>
 			<path d="M2 4.5h11M2 10.5h11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-			<circle cx="9.5" cy="4.5" r="1.9" fill="var(--toolbar)" stroke="currentColor" strokeWidth="1.4" />
-			<circle cx="5.5" cy="10.5" r="1.9" fill="var(--toolbar)" stroke="currentColor" strokeWidth="1.4" />
+			<circle cx="9.5" cy="4.5" r="1.9" fill="var(--surface-toolbar)" stroke="currentColor" strokeWidth="1.4" />
+			<circle cx="5.5" cy="10.5" r="1.9" fill="var(--surface-toolbar)" stroke="currentColor" strokeWidth="1.4" />
 		</svg>
 	);
 }
