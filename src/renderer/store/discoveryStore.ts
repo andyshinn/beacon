@@ -17,6 +17,7 @@ interface DiscoveryState {
 	pausedAt: number;
 	now: number;
 	toast: string | null;
+	permissionHint: boolean;
 	applySnapshot: (snapshot: DiscoverySnapshot) => void;
 	applyDelta: (delta: DiscoveryDelta) => void;
 	applyStatus: (status: DiscoveryStatus) => void;
@@ -32,6 +33,8 @@ interface DiscoveryState {
 	clearSearch: () => void;
 	showToast: (msg: string) => void;
 	dismissToast: () => void;
+	showPermissionHint: () => void;
+	dismissPermissionHint: () => void;
 }
 
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
@@ -46,6 +49,7 @@ export const useDiscoveryStore = create<DiscoveryState>((set) => ({
 	pausedAt: 0,
 	now: 0,
 	toast: null,
+	permissionHint: false,
 
 	applySnapshot: (snapshot) =>
 		set(() => ({
@@ -105,4 +109,7 @@ export const useDiscoveryStore = create<DiscoveryState>((set) => ({
 		if (toastTimer) clearTimeout(toastTimer);
 		set({ toast: null });
 	},
+
+	showPermissionHint: () => set({ permissionHint: true }),
+	dismissPermissionHint: () => set({ permissionHint: false }),
 }));

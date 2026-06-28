@@ -1,5 +1,6 @@
 import { DetailPane } from "./components/DetailPane";
 import { ListPane } from "./components/ListPane";
+import { PermissionBanner } from "./components/PermissionBanner";
 import { StatusBar } from "./components/StatusBar";
 import { Toast } from "./components/Toast";
 import { Toolbar } from "./components/Toolbar";
@@ -29,6 +30,7 @@ export function App() {
 				<StatusBar />
 			</footer>
 			<Toast />
+			<PermissionBanner />
 		</div>
 	);
 }

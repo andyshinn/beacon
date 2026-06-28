@@ -40,6 +40,7 @@ beforeEach(() => {
 		pausedAt: 0,
 		now: 0,
 		toast: null,
+		permissionHint: false,
 	});
 });
 
@@ -102,4 +103,13 @@ describe("search + toast", () => {
 		expect(useDiscoveryStore.getState().toast).toBeNull();
 		vi.useRealTimers();
 	});
+});
+
+it("shows and dismisses the permission hint", () => {
+	const store = useDiscoveryStore.getState();
+	expect(useDiscoveryStore.getState().permissionHint).toBe(false);
+	store.showPermissionHint();
+	expect(useDiscoveryStore.getState().permissionHint).toBe(true);
+	store.dismissPermissionHint();
+	expect(useDiscoveryStore.getState().permissionHint).toBe(false);
 });

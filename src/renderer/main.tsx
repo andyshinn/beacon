@@ -12,6 +12,7 @@ const store = useDiscoveryStore.getState();
 window.beacon.onSnapshot((snapshot) => store.applySnapshot(snapshot));
 window.beacon.onDelta((delta) => store.applyDelta(delta));
 window.beacon.onStatus((status) => store.applyStatus(status));
+window.beacon.onHealth(() => store.showPermissionHint());
 void window.beacon.getSnapshot().then((snapshot) => store.applySnapshot(snapshot));
 
 // Toast when a rescan finishes (scanning true → false).
