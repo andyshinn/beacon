@@ -1,7 +1,14 @@
 import type { IpcRendererEvent } from "electron";
 import { contextBridge, ipcRenderer } from "electron";
 import type { BeaconApi, Unsubscribe } from "../shared/beacon-api";
-import type { DeltaPayload, HealthPayload, SnapshotPayload, StatusPayload } from "../shared/ipc";
+import type {
+	DeltaPayload,
+	HealthPayload,
+	MenuCommand,
+	MenuStatePayload,
+	SnapshotPayload,
+	StatusPayload,
+} from "../shared/ipc";
 import { IPC } from "../shared/ipc";
 
 function subscribe<T>(channel: string, listener: (payload: T) => void): Unsubscribe {
@@ -23,6 +30,8 @@ const beacon: BeaconApi = {
 	getSnapshot: () => ipcRenderer.invoke(IPC.getSnapshot) as Promise<SnapshotPayload>,
 	openExternal: (url) => ipcRenderer.invoke(IPC.openExternal, url) as Promise<void>,
 	openLocalNetworkSettings: () => ipcRenderer.invoke(IPC.openLocalNetworkSettings) as Promise<void>,
+	onMenuCommand: (l) => subscribe<MenuCommand>(IPC.menuCommand, l),
+	sendMenuState: (state: MenuStatePayload) => ipcRenderer.send(IPC.menuState, state),
 };
 
 contextBridge.exposeInMainWorld("beacon", beacon);
