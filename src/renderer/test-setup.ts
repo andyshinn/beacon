@@ -1,3 +1,21 @@
+import { cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
+
+// Ensure @testing-library/react cleans up between tests when vitest globals
+// are not enabled (auto-cleanup requires the global afterEach to be present).
+afterEach(() => {
+	cleanup();
+});
+
+// happy-dom exposes navigator.clipboard as a non-configurable getter, which
+// prevents Object.assign from overriding it in tests. Redefine it as a
+// configurable, writable property so test code can swap in a mock.
+Object.defineProperty(navigator, "clipboard", {
+	configurable: true,
+	writable: true,
+	value: { writeText: () => Promise.resolve() },
+});
+
 // Node v26 exposes `localStorage` as undefined unless --localstorage-file is
 // provided. happy-dom's populateGlobal skips keys already present on global,
 // so `localStorage` is never injected into the test scope. We install a simple
