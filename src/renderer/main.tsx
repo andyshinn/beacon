@@ -5,6 +5,7 @@ import "@radix-ui/themes/styles.css";
 import "./styles/tokens.css";
 import { App } from "./App";
 import { installKeyboard } from "./lib/keyboard";
+import { installMenu } from "./lib/menu";
 import { installNavigation } from "./lib/navigation";
 import { useDiscoveryStore } from "./store/discoveryStore";
 import { useSettingsStore } from "./store/settingsStore";
@@ -30,10 +31,12 @@ function Root() {
 		const clock = setInterval(() => useDiscoveryStore.getState().tick(Date.now()), 1000);
 		const removeKeys = installKeyboard();
 		const removeNav = installNavigation();
+		const removeMenu = installMenu();
 		return () => {
 			clearInterval(clock);
 			removeKeys();
 			removeNav();
+			removeMenu();
 		};
 	}, []);
 	return (
