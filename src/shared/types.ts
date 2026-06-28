@@ -82,3 +82,7 @@ export interface DiscoveryStatus {
 	live: boolean;
 	scanning: boolean;
 }
+
+export interface DiscoveryHealth {
+	warning: "local-network";
+}

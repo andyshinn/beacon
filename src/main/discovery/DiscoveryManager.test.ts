@@ -7,6 +7,28 @@ function collector() {
 	return { events, onEvent: (e: ManagerEvent) => events.push(e) };
 }
 
+function fakeHealth() {
+	let warn: (() => void) | undefined;
+	return {
+		armed: 0,
+		noted: 0,
+		cancelled: 0,
+		arm(onWarn: () => void) {
+			this.armed++;
+			warn = onWarn;
+		},
+		noteActivity() {
+			this.noted++;
+		},
+		cancel() {
+			this.cancelled++;
+		},
+		triggerWarn() {
+			warn?.();
+		},
+	};
+}
+
 describe("DiscoveryManager", () => {
 	beforeEach(() => vi.useFakeTimers());
 	afterEach(() => vi.useRealTimers());
@@ -69,6 +91,43 @@ describe("DiscoveryManager", () => {
 		expect(events).toContainEqual({ type: "status", status: { live: true, scanning: true } });
 		vi.advanceTimersByTime(1200);
 		expect(events).toContainEqual({ type: "status", status: { live: true, scanning: false } });
+	});
+
+	it("arms the health check on start and notes activity on an up event", () => {
+		const source = new FakeSource();
+		const { onEvent } = collector();
+		const health = fakeHealth();
+		new DiscoveryManager({ source, onEvent, healthCheck: health }).start();
+		expect(health.armed).toBe(1);
+		source.emit({
+			type: "up",
+			service: makeService({
+				name: "Porch",
+				serviceType: "_http._tcp",
+				hostname: "porch.local.",
+				addresses: ["172.16.20.170"],
+			}),
+		});
+		expect(health.noted).toBeGreaterThanOrEqual(1);
+	});
+
+	it("emits a health event when the health check warns", () => {
+		const source = new FakeSource();
+		const { events, onEvent } = collector();
+		const health = fakeHealth();
+		new DiscoveryManager({ source, onEvent, healthCheck: health }).start();
+		health.triggerWarn();
+		expect(events).toContainEqual({ type: "health", health: { warning: "local-network" } });
+	});
+
+	it("cancels the health check when paused", () => {
+		const source = new FakeSource();
+		const { onEvent } = collector();
+		const health = fakeHealth();
+		const manager = new DiscoveryManager({ source, onEvent, healthCheck: health });
+		manager.start();
+		manager.setLive(false);
+		expect(health.cancelled).toBeGreaterThanOrEqual(1);
 	});
 
 	it("setLive(false) stops the source and interval without clearing the model", () => {

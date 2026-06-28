@@ -9,6 +9,8 @@ const manager = new DiscoveryManager({
 			console.log(`[snapshot] ${e.snapshot.hosts.length} hosts, ${e.snapshot.instances.length} instances`);
 		} else if (e.type === "status") {
 			console.log(`[status] live=${e.status.live} scanning=${e.status.scanning}`);
+		} else if (e.type === "health") {
+			console.log(`[health] warning=${e.health.warning}`);
 		} else {
 			const d = e.delta;
 			for (const i of d.upsertInstances ?? [])

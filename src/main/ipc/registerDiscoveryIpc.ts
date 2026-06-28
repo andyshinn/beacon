@@ -22,7 +22,8 @@ export function registerDiscoveryIpc(win: BrowserWindow): void {
 	const onEvent = (e: ManagerEvent): void => {
 		if (e.type === "snapshot") push(IPC.snapshot, e.snapshot);
 		else if (e.type === "delta") push(IPC.delta, e.delta);
-		else push(IPC.status, e.status);
+		else if (e.type === "status") push(IPC.status, e.status);
+		// "health" handling wired in Task 4
 	};
 
 	const manager = new DiscoveryManager({ source: new BonjourSource(), onEvent });
