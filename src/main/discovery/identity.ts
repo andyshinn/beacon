@@ -1,5 +1,5 @@
 function normalizeDot(name: string): string {
-	return name.endsWith(".") ? name : name + ".";
+	return name.endsWith(".") ? name : `${name}.`;
 }
 
 export function instanceKey(fqdn: string): string {

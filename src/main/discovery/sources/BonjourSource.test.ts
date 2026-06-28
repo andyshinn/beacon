@@ -70,7 +70,7 @@ describe("BonjourSource (injected factory)", () => {
 		const seen = vi.fn();
 		src.subscribe(seen);
 		src.start();
-		f.handlers["up"]!(sampleService);
+		f.handlers.up!(sampleService);
 		expect(seen).toHaveBeenCalledWith({
 			type: "up",
 			service: expect.objectContaining({
@@ -87,7 +87,7 @@ describe("BonjourSource (injected factory)", () => {
 		const seen = vi.fn();
 		src.subscribe(seen);
 		src.start();
-		f.handlers["down"]!(sampleService);
+		f.handlers.down!(sampleService);
 		expect(seen).toHaveBeenCalledWith({ type: "down", key: "andy's mac studio._airplay._tcp.local." });
 	});
 
