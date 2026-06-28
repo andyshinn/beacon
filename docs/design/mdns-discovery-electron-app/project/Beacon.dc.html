@@ -9,7 +9,7 @@
 <x-dc>
 <helmet>
 <script>
-(function(){var token=new URLSearchParams(location.search).get('t');if(!token)return;function ready(){return !!(window.customElements&&customElements.get('x-dc'));}function ensure(){if(ready()||window.__dcReinject)return;window.__dcReinject=true;var s=document.createElement('script');s.src='./support.js?t='+encodeURIComponent(token);document.head.appendChild(s);}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){setTimeout(ensure,0);});}else{setTimeout(ensure,0);}})();
+(()=> {var token=new URLSearchParams(location.search).get('t');if(!token)return;function ready(){return !!(window.customElements&&customElements.get('x-dc'));}function ensure(){if(ready()||window.__dcReinject)return;window.__dcReinject=true;var s=document.createElement('script');s.src='./support.js?t='+encodeURIComponent(token);document.head.appendChild(s);}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=> {setTimeout(ensure,0);});}else{setTimeout(ensure,0);}})();
 </script>
 <style>
 :root,.app{ --r2:4px; --r3:6px; --r4:8px; --r5:12px;

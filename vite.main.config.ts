@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from "vite";
 export default defineConfig({
-  resolve: { conditions: ['node'], mainFields: ['module', 'jsnext:main', 'jsnext'] },
-})
+	resolve: { conditions: ["node"], mainFields: ["module", "jsnext:main", "jsnext"] },
+});
