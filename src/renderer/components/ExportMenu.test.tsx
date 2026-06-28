@@ -1,16 +1,16 @@
 // src/renderer/components/ExportMenu.test.tsx
-// NOTE: Radix DropdownMenu portals its content and happy-dom does not surface
-// portalled elements even with async findByText — the trigger button stays
-// data-state="closed" regardless of pointer/click events. Per task brief, the
-// fallback is to assert via the store after exercising the command directly.
+// Uses defaultOpen to surface Radix DropdownMenu portalled content in happy-dom.
+// If happy-dom cannot render portalled content even with defaultOpen, the tests
+// fall back to asserting the trigger renders and avoid hollow store-only assertions.
 import { Theme } from "@radix-ui/themes";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useDiscoveryStore } from "../store/discoveryStore";
 import { ExportMenu } from "./ExportMenu";
 
 beforeEach(() => {
 	useDiscoveryStore.setState({ instances: new Map(), hosts: new Map(), query: "", toast: null });
+	vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText: vi.fn().mockResolvedValue(undefined) } });
 });
 
 describe("ExportMenu", () => {
@@ -23,12 +23,17 @@ describe("ExportMenu", () => {
 		expect(screen.getByRole("button", { name: /export/i })).toBeTruthy();
 	});
 
-	it("copies a snapshot for the text option (portal workaround: happy-dom cannot surface Radix portalled content)", async () => {
-		// Directly exercise the same command the menu item fires — proves the
-		// wiring is correct without needing the portal to open.
-		vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText: vi.fn().mockResolvedValue(undefined) } });
-		const { exportAs } = await import("../lib/commands");
-		await exportAs("txt");
-		expect(useDiscoveryStore.getState().toast).toBe("Copied snapshot");
+	it("copies a snapshot when Copy as text item is clicked", async () => {
+		render(
+			<Theme>
+				<ExportMenu defaultOpen />
+			</Theme>,
+		);
+		const item = await screen.findByText("Copy as text");
+		fireEvent.click(item);
+		// Allow the async exportAs("txt") to settle
+		await vi.waitFor(() => {
+			expect(useDiscoveryStore.getState().toast).toBe("Copied snapshot");
+		});
 	});
 });

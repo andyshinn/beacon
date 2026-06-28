@@ -8,9 +8,9 @@ const OPTIONS: { kind: "json" | "csv" | "txt"; ext: string; label: string }[] = 
 	{ kind: "txt", ext: "TXT", label: "Copy as text" },
 ];
 
-export function ExportMenu() {
+export function ExportMenu({ defaultOpen }: { defaultOpen?: boolean } = {}) {
 	return (
-		<DropdownMenu.Root>
+		<DropdownMenu.Root defaultOpen={defaultOpen}>
 			<DropdownMenu.Trigger>
 				<Button color="indigo" variant="solid" size="2">
 					<Download />
