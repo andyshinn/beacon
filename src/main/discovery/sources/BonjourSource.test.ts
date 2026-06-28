@@ -52,6 +52,7 @@ describe("toDiscoveredService", () => {
 describe("BonjourSource (injected factory)", () => {
 	function fakeBonjour() {
 		const handlers: Record<string, (s: BonjourLikeService) => void> = {};
+		let errorCb: ((err: Error) => void) | undefined;
 		const browser: BrowserLike = {
 			on: (event, cb) => {
 				handlers[event] = cb;
@@ -60,8 +61,14 @@ describe("BonjourSource (injected factory)", () => {
 			expire: vi.fn(),
 			stop: vi.fn(),
 		};
-		const engine: BonjourLike = { find: () => browser, destroy: vi.fn() };
-		return { engine, browser, handlers };
+		const engine: BonjourLike = {
+			find: () => browser,
+			destroy: vi.fn(),
+			onError: (cb) => {
+				errorCb = cb;
+			},
+		};
+		return { engine, browser, handlers, emitError: (err: Error) => errorCb?.(err) };
 	}
 
 	it("emits an up SourceEvent mapped from a bonjour up event", () => {
@@ -114,5 +121,23 @@ describe("BonjourSource (injected factory)", () => {
 			src.update();
 			src.stop();
 		}).not.toThrow();
+	});
+
+	it("disables a transport that emits a fatal socket error, without throwing", () => {
+		const f4 = fakeBonjour();
+		const f6 = fakeBonjour();
+		const warn = vi.fn();
+		const src = new BonjourSource({
+			createBonjour: (kind) => (kind === "udp6" ? f6.engine : f4.engine),
+			warn,
+		});
+		src.start();
+		expect(() => f6.emitError(new Error("bind EADDRNOTAVAIL fe80::1%10:5353"))).not.toThrow();
+		// the udp6 transport is dropped; the udp4 transport keeps working
+		src.update();
+		expect(f4.browser.update).toHaveBeenCalledTimes(1);
+		expect(f6.browser.update).not.toHaveBeenCalled();
+		expect(f6.engine.destroy).toHaveBeenCalled();
+		expect(warn).toHaveBeenCalledTimes(1);
 	});
 });

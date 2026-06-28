@@ -25,6 +25,10 @@ export interface BrowserLike {
 export interface BonjourLike {
 	find(opts: null): BrowserLike;
 	destroy(): void;
+	// Attach a handler for a fatal socket error (e.g. a udp6 bind failure). Optional so
+	// injected test factories may omit it; the default factory wires it to the underlying
+	// multicast-dns socket's 'error' event.
+	onError?(cb: (err: Error) => void): void;
 }
 
 export type BonjourFactory = (kind: "udp4" | "udp6") => BonjourLike | null;
@@ -76,56 +80,103 @@ function defaultIpv6InterfaceAddress(): string | undefined {
 	return undefined;
 }
 
+// The slice of bonjour-service we reach into: server.mdns is the multicast-dns socket
+// wrapper, whose 'error' event fires on a bind failure (bonjour-service does not handle it).
+interface RawBonjour {
+	find(opts: null): BrowserLike;
+	destroy(): void;
+	server?: { mdns?: { on?(event: string, cb: (err: Error) => void): void } };
+}
+
 const defaultFactory: BonjourFactory = (kind) => {
-	if (kind === "udp4") return new Bonjour() as unknown as BonjourLike;
-	const iface = defaultIpv6InterfaceAddress();
-	if (!iface) return null;
-	// udp6 option shape isn't in bonjour-service's types; verified live via scripts/discover.ts (smoke harness)
-	return new Bonjour({ type: "udp6", ip: "ff02::fb", interface: iface } as never) as unknown as BonjourLike;
+	let raw: RawBonjour;
+	if (kind === "udp4") {
+		raw = new Bonjour() as unknown as RawBonjour;
+	} else {
+		const iface = defaultIpv6InterfaceAddress();
+		if (!iface) return null;
+		// udp6 option shape isn't in bonjour-service's types; verified live via scripts/discover.ts
+		raw = new Bonjour({ type: "udp6", ip: "ff02::fb", interface: iface } as never) as unknown as RawBonjour;
+	}
+	return {
+		find: (opts) => raw.find(opts),
+		destroy: () => raw.destroy(),
+		onError: (cb) => raw.server?.mdns?.on?.("error", cb),
+	};
 };
+
+interface EngineRecord {
+	engine: BonjourLike;
+	browser: BrowserLike;
+}
 
 export class BonjourSource implements DiscoverySource {
 	private readonly createBonjour: BonjourFactory;
-	private engines: BonjourLike[] = [];
-	private browsers: BrowserLike[] = [];
+	private readonly warn: (message: string) => void;
+	private records: EngineRecord[] = [];
 	private listeners = new Set<(event: SourceEvent) => void>();
 
-	constructor(options?: { createBonjour?: BonjourFactory }) {
+	constructor(options?: { createBonjour?: BonjourFactory; warn?: (message: string) => void }) {
 		this.createBonjour = options?.createBonjour ?? defaultFactory;
+		this.warn = options?.warn ?? ((message) => console.warn(message));
 	}
 
 	start(): void {
 		for (const kind of ["udp4", "udp6"] as const) {
 			const engine = this.createBonjour(kind);
 			if (!engine) continue;
+			// Catch fatal socket errors (e.g. a udp6 bind EADDRNOTAVAIL on a link-local
+			// interface) so one failing transport degrades gracefully instead of crashing
+			// the process with an unhandled 'error' event.
+			engine.onError?.((err) => this.handleEngineError(kind, engine, err));
 			const browser = engine.find(null);
 			browser.on("up", (s) => this.emit({ type: "up", service: toDiscoveredService(s) }));
 			browser.on("srv-update", (s) => this.emit({ type: "srv-update", service: toDiscoveredService(s) }));
 			browser.on("txt-update", (s) => this.emit({ type: "txt-update", service: toDiscoveredService(s) }));
 			browser.on("down", (s) => this.emit({ type: "down", key: instanceKey(s.fqdn) }));
-			this.engines.push(engine);
-			this.browsers.push(browser);
+			this.records.push({ engine, browser });
 		}
 	}
 
 	stop(): void {
-		for (const b of this.browsers) b.stop();
-		for (const e of this.engines) e.destroy();
-		this.browsers = [];
-		this.engines = [];
+		for (const { engine, browser } of this.records) {
+			browser.stop();
+			engine.destroy();
+		}
+		this.records = [];
 	}
 
 	update(): void {
-		for (const b of this.browsers) b.update();
+		for (const { browser } of this.records) browser.update();
 	}
 
 	expire(): void {
-		for (const b of this.browsers) b.expire();
+		for (const { browser } of this.records) browser.expire();
 	}
 
 	subscribe(listener: (event: SourceEvent) => void): () => void {
 		this.listeners.add(listener);
 		return () => this.listeners.delete(listener);
+	}
+
+	private handleEngineError(kind: "udp4" | "udp6", engine: BonjourLike, err: Error): void {
+		const idx = this.records.findIndex((r) => r.engine === engine);
+		if (idx >= 0) {
+			const [rec] = this.records.splice(idx, 1);
+			if (rec) {
+				try {
+					rec.browser.stop();
+				} catch {
+					/* socket already torn down */
+				}
+				try {
+					rec.engine.destroy();
+				} catch {
+					/* socket already torn down */
+				}
+			}
+		}
+		this.warn(`[discovery] ${kind} transport disabled after socket error: ${err.message}`);
 	}
 
 	private emit(event: SourceEvent): void {
