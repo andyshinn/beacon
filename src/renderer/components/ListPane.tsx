@@ -2,11 +2,12 @@ import { IconButton, Tooltip } from "@radix-ui/themes";
 import { useMemo } from "react";
 import type { Instance } from "../../shared/types";
 import { CollapseAll, ExpandAll } from "../lib/icons";
-import { buildHostTree, buildServiceTree, type SelectorCtx, visibleInstances } from "../lib/selectors";
+import { buildHostTree, buildIpGroups, buildServiceTree, type SelectorCtx, visibleInstances } from "../lib/selectors";
 import { useDiscoveryStore } from "../store/discoveryStore";
 import { useSettingsStore } from "../store/settingsStore";
 import styles from "./ListPane.module.css";
 import { HostsLens } from "./lenses/HostsLens";
+import { IpsLens } from "./lenses/IpsLens";
 import { ServicesLens } from "./lenses/ServicesLens";
 
 const TITLE = { service: "Services", host: "Hosts", ip: "Discovered IPs", all: "All Instances" } as const;
@@ -38,6 +39,7 @@ export function ListPane() {
 
 	const serviceGroups = useMemo(() => buildServiceTree(visible, ctx), [visible, ctx]);
 	const hostGroups = useMemo(() => buildHostTree(visible, ctx), [visible, ctx]);
+	const ipGroups = useMemo(() => buildIpGroups(visible, ctx), [visible, ctx]);
 
 	const isTree = mode === "service" || mode === "host";
 	let count = 0;
@@ -51,9 +53,12 @@ export function ListPane() {
 		count = hostGroups.length;
 		word = "hosts";
 		body = <HostsLens groups={hostGroups} />;
+	} else if (mode === "ip") {
+		count = ipGroups.reduce((n, g) => n + g.addresses.length, 0);
+		word = "addresses";
+		body = <IpsLens groups={ipGroups} />;
 	} else {
-		// ip / all lenses arrive in Tasks 9 & 10.
-		word = mode === "ip" ? "addresses" : "instances";
+		word = "instances"; // all lens arrives in Task 10
 	}
 
 	const groupIds = () =>
