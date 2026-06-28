@@ -1,11 +1,13 @@
-import { Button, IconButton, SegmentedControl, Tooltip } from "@radix-ui/themes";
+import { IconButton, SegmentedControl, Tooltip } from "@radix-ui/themes";
 import { rescan } from "../lib/commands";
-import { Download, Refresh, Sun } from "../lib/icons";
+import { Refresh, Sun } from "../lib/icons";
 import { useDiscoveryStore } from "../store/discoveryStore";
 import { type Lens, useSettingsStore } from "../store/settingsStore";
+import { ExportMenu } from "./ExportMenu";
 import { LiveToggle } from "./LiveToggle";
 import { SearchField } from "./SearchField";
 import styles from "./Toolbar.module.css";
+import { ViewMenu } from "./ViewMenu";
 
 const SEGMENTS: { value: Lens; label: string }[] = [
 	{ value: "service", label: "Services" },
@@ -49,17 +51,13 @@ export function Toolbar() {
 					</span>
 				</IconButton>
 			</Tooltip>
-			{/* TODO(Task 7): <ViewMenu /> */}
+			<ViewMenu />
 			<Tooltip content="Toggle appearance">
 				<IconButton variant="ghost" size="2" aria-label="Toggle appearance" onClick={() => toggleAppearance()}>
 					<Sun />
 				</IconButton>
 			</Tooltip>
-			{/* TODO(Task 7): <ExportMenu />, replacing this placeholder button */}
-			<Button color="indigo" variant="solid" size="2">
-				<Download />
-				Export
-			</Button>
+			<ExportMenu />
 		</>
 	);
 }
