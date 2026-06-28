@@ -1,0 +1,31 @@
+.dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+}
+.dotLive {
+	background: var(--green-9);
+	animation: bcn-liveplus 2s infinite;
+}
+.dotPaused {
+	background: var(--gray-8);
+}
+.dotStale {
+	background: var(--amber-9);
+	animation: bcn-amberpulse 1.6s infinite;
+}
+.label {
+	color: var(--gray-11);
+	font-weight: 550;
+}
+.divider {
+	width: 1px;
+	height: 13px;
+	background: var(--gray-a6);
+}
+.counts {
+	font-variant-numeric: tabular-nums;
+}
+.spacer {
+	flex: 1;
+}

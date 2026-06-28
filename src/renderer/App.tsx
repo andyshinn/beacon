@@ -1,5 +1,7 @@
 import { DetailPane } from "./components/DetailPane";
 import { ListPane } from "./components/ListPane";
+import { StatusBar } from "./components/StatusBar";
+import { Toast } from "./components/Toast";
 import { Toolbar } from "./components/Toolbar";
 
 export function App() {
@@ -17,7 +19,10 @@ export function App() {
 					<DetailPane />
 				</section>
 			</div>
-			<footer className="bcn-status-bar" />
+			<footer className="bcn-status-bar">
+				<StatusBar />
+			</footer>
+			<Toast />
 		</div>
 	);
 }
