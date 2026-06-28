@@ -8,9 +8,22 @@ import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-nati
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import type { ForgeConfig } from "@electron-forge/shared-types";
+import { keepInPackage } from "./scripts/packageIgnore";
 
 const config: ForgeConfig = {
-	packagerConfig: { asar: true },
+	packagerConfig: {
+		asar: true,
+		appBundleId: "com.andyshinn.beacon",
+		extendInfo: {
+			// macOS Sequoia (15+) gates mDNS behind the Local Network TCC permission, even for
+			// a packaged double-clicked .app. This string is shown in the system permission prompt.
+			NSLocalNetworkUsageDescription:
+				"Beacon scans your local network to discover Bonjour and mDNS services so it can show the devices around you.",
+		},
+		// Override the Vite plugin's strip-everything ignore so the externalized bonjour-service
+		// closure ships (see scripts/packageIgnore.ts). The plugin respects a user-set function ignore.
+		ignore: (file: string) => !keepInPackage(file),
+	},
 	rebuildConfig: {},
 	makers: [new MakerSquirrel({}), new MakerZIP({}, ["darwin"]), new MakerRpm({}), new MakerDeb({}), new MakerDMG({})],
 	plugins: [
