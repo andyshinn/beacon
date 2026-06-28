@@ -1,9 +1,10 @@
-import { type BrowserWindow, ipcMain, shell } from "electron";
+import { type BrowserWindow, ipcMain, powerMonitor, shell } from "electron";
 import { IPC } from "../../shared/ipc";
 import type { ManagerEvent } from "../discovery/DiscoveryManager";
 import { DiscoveryManager } from "../discovery/DiscoveryManager";
 import { LocalNetworkHealthCheck } from "../discovery/permissionHealth";
 import { BonjourSource } from "../discovery/sources/BonjourSource";
+import { installPowerEvents } from "../powerEvents";
 
 export function registerDiscoveryIpc(win: BrowserWindow): void {
 	const wc = win.webContents;
@@ -31,6 +32,12 @@ export function registerDiscoveryIpc(win: BrowserWindow): void {
 		source: new BonjourSource(),
 		onEvent,
 		healthCheck: new LocalNetworkHealthCheck({ enabled: process.platform === "darwin" }),
+	});
+
+	const teardownPower = installPowerEvents({
+		powerMonitor,
+		isLive: () => manager.getStatus().live,
+		restart: () => manager.restartSource(),
 	});
 
 	// Commands. NOTE: ipcMain.handle is process-global while the manager is per-window.
@@ -79,6 +86,7 @@ export function registerDiscoveryIpc(win: BrowserWindow): void {
 	});
 
 	win.on("closed", () => {
+		teardownPower();
 		manager.stop();
 		for (const ch of [
 			IPC.rescan,
