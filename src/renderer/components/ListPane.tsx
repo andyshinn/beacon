@@ -2,10 +2,18 @@ import { IconButton, Tooltip } from "@radix-ui/themes";
 import { useMemo } from "react";
 import type { Instance } from "../../shared/types";
 import { CollapseAll, ExpandAll } from "../lib/icons";
-import { buildHostTree, buildIpGroups, buildServiceTree, type SelectorCtx, visibleInstances } from "../lib/selectors";
+import {
+	buildFlat,
+	buildHostTree,
+	buildIpGroups,
+	buildServiceTree,
+	type SelectorCtx,
+	visibleInstances,
+} from "../lib/selectors";
 import { useDiscoveryStore } from "../store/discoveryStore";
 import { useSettingsStore } from "../store/settingsStore";
 import styles from "./ListPane.module.css";
+import { AllLens } from "./lenses/AllLens";
 import { HostsLens } from "./lenses/HostsLens";
 import { IpsLens } from "./lenses/IpsLens";
 import { ServicesLens } from "./lenses/ServicesLens";
@@ -40,6 +48,7 @@ export function ListPane() {
 	const serviceGroups = useMemo(() => buildServiceTree(visible, ctx), [visible, ctx]);
 	const hostGroups = useMemo(() => buildHostTree(visible, ctx), [visible, ctx]);
 	const ipGroups = useMemo(() => buildIpGroups(visible, ctx), [visible, ctx]);
+	const flatRows = useMemo(() => buildFlat(visible, ctx), [visible, ctx]);
 
 	const isTree = mode === "service" || mode === "host";
 	let count = 0;
@@ -58,7 +67,9 @@ export function ListPane() {
 		word = "addresses";
 		body = <IpsLens groups={ipGroups} />;
 	} else {
-		word = "instances"; // all lens arrives in Task 10
+		count = flatRows.length;
+		word = "instances";
+		body = <AllLens rows={flatRows} />;
 	}
 
 	const groupIds = () =>
