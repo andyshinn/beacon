@@ -46,7 +46,7 @@ export function Toolbar() {
 			<SearchField />
 			<Tooltip content="Rescan network">
 				<IconButton variant="ghost" size="2" aria-label="Rescan network" onClick={() => void rescan()}>
-					<span className={scanning ? styles.spin : undefined}>
+					<span className={`${styles.refreshIcon}${scanning ? ` ${styles.spin}` : ""}`}>
 						<Refresh />
 					</span>
 				</IconButton>

@@ -1,3 +1,4 @@
+import { ScrollArea } from "@radix-ui/themes";
 import { useMemo } from "react";
 import { buildDetail, type DetailCtx } from "../lib/detail";
 import { useDiscoveryStore } from "../store/discoveryStore";
@@ -23,13 +24,15 @@ export function DetailPane() {
 	return (
 		<>
 			<DetailHeader detail={detail} />
-			<div className="bcn-scroll" style={{ padding: "6px 20px 24px" }}>
-				<AddressBlock title={detail.addrTitle} groups={detail.addrGroups} />
-				<MetaTable rows={detail.meta} />
-				<ServicesList title={detail.servicesTitle} rows={detail.services} />
-				<HostsList title={detail.hostsTitle} rows={detail.hosts} />
-				<TxtSection detail={detail} />
-			</div>
+			<ScrollArea className="bcn-scroll" type="hover" scrollbars="vertical" scrollHideDelay={500}>
+				<div className="bcn-scroll-content" style={{ padding: "6px 20px 24px" }}>
+					<AddressBlock title={detail.addrTitle} groups={detail.addrGroups} />
+					<MetaTable rows={detail.meta} />
+					<ServicesList title={detail.servicesTitle} rows={detail.services} />
+					<HostsList title={detail.hostsTitle} rows={detail.hosts} />
+					<TxtSection detail={detail} />
+				</div>
+			</ScrollArea>
 		</>
 	);
 }

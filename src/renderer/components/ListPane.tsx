@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from "@radix-ui/themes";
+import { IconButton, ScrollArea, Tooltip } from "@radix-ui/themes";
 import { useMemo } from "react";
 import type { Instance } from "../../shared/types";
 import { CollapseAll, ExpandAll } from "../lib/icons";
@@ -100,9 +100,11 @@ export function ListPane() {
 					</>
 				)}
 			</div>
-			<div className="bcn-scroll" style={{ padding: "6px 6px 14px" }}>
-				{body}
-			</div>
+			<ScrollArea className="bcn-scroll" type="hover" scrollbars="vertical" scrollHideDelay={500}>
+				<div className="bcn-scroll-content" style={{ padding: "6px 6px 14px" }}>
+					{body}
+				</div>
+			</ScrollArea>
 		</>
 	);
 }

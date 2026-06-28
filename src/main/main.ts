@@ -11,10 +11,15 @@ declare const MAIN_WINDOW_VITE_NAME: string;
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function createWindow(): void {
+	const isMac = process.platform === "darwin";
 	const win = new BrowserWindow({
 		width: 1100,
 		height: 720,
-		titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
+		titleBarStyle: isMac ? "hiddenInset" : "default",
+		// hiddenInset positions the traffic lights for a standard ~28px title bar;
+		// nudge them down/right to sit centered in our taller 46px toolbar
+		// (.bcn-toolbar height) and align with the design mockup.
+		trafficLightPosition: isMac ? { x: 13, y: 16 } : undefined,
 		webPreferences: {
 			preload: path.join(dirname, "preload.js"),
 			contextIsolation: true,

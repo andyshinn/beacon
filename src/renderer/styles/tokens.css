@@ -1,12 +1,46 @@
-/* Bespoke surfaces (no clean Radix token) + fixed "comfortable" density. */
+/* Bespoke surfaces + fixed "comfortable" density. Values are the nearest Radix
+   slate scale steps (slate-1/2/3), pinned as literals rather than var(--slate-*)
+   because html/body sit OUTSIDE the Radix <Theme> root and never get its
+   .light/.dark class, so the raw slate tokens aren't in scope there. They
+   default to the dark palette here so html/body stay dark; the .light override
+   below re-defines them on the Theme root so every surface inside the app flips
+   with the appearance toggle. Without it the bespoke surfaces stayed dark while
+   Radix flipped --gray-* to light, leaving dark text on dark panels. */
 :root {
-	--app-bg: #0d0d0f;
-	--surface-panel: #161618;
-	--surface-toolbar: #1e1e21;
-	--surface-menu: #161618;
+	--app-bg: #111113; /* slate-1 (dark) */
+	--surface-panel: #18191b; /* slate-2 (dark) */
+	--surface-toolbar: #212225; /* slate-3 (dark) */
+	--surface-menu: #18191b; /* slate-2 (dark) */
 	--row-h: 30px;
 	--list-fs: 13px;
 	--row-pad: 10px;
+}
+
+/* Light appearance: Radix puts `.light` (or `.light-theme`) on the <Theme>
+   root, so these cascade to every surface inside the app. Values track the
+   slate light scale used by the --gray-* borders for a cohesive look. */
+.light,
+.light-theme {
+	--app-bg: #fcfcfd; /* slate-1 (light) */
+	--surface-panel: #f9f9fb; /* slate-2 (light) */
+	--surface-toolbar: #f0f0f3; /* slate-3 (light) */
+	--surface-menu: #fcfcfd; /* slate-1 (light) */
+}
+
+/* Reset the UA defaults so the app fills the window edge-to-edge. Without this
+   the browser's default `body { margin: 8px }` framed the whole app and pushed
+   `.bcn-app` (height: 100vh) past the viewport, producing a permanent
+   document-level scrollbar. Mirrors the design mockup's html/body reset. */
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overflow: hidden;
+	background: var(--app-bg);
+}
+#root {
+	height: 100%;
 }
 
 .bcn-app {
@@ -88,8 +122,8 @@
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
-	background: #fff;
-	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+	background: var(--white-a12);
+	box-shadow: 0 0 0 2px var(--white-a6);
 }
 .bcn-title {
 	font-weight: 650;
@@ -97,10 +131,13 @@
 	letter-spacing: 0.01em;
 }
 
-/* Dimmable scroll panels (staleness tint). */
+/* Dimmable scroll panels (staleness tint). The scroll container itself is a
+   Radix <ScrollArea> (it owns the viewport + the auto-hiding custom scrollbar),
+   so this class only sizes the Root to fill the pane below the header and
+   carries the staleness dimming. */
 .bcn-scroll {
 	flex: 1;
-	overflow-y: auto;
+	min-height: 0;
 	transition:
 		opacity 0.8s,
 		filter 0.8s;
@@ -112,19 +149,12 @@
 	opacity: 0.5;
 	filter: grayscale(0.4);
 }
-.bcn-scroll::-webkit-scrollbar {
-	width: 11px;
-}
-.bcn-scroll::-webkit-scrollbar-thumb {
-	background: var(--gray-a6);
-	border-radius: 8px;
-	border: 3px solid transparent;
-	background-clip: padding-box;
-}
-.bcn-scroll::-webkit-scrollbar-thumb:hover {
-	background: var(--gray-a8);
-	border: 3px solid transparent;
-	background-clip: padding-box;
+/* Radix viewport forces `width: fit-content` on its single child to enable
+   horizontal scrolling; we only scroll vertically, so let the content fill the
+   pane width (keeps right-aligned badges / full-width tables flush). */
+.bcn-scroll-content {
+	width: 100%;
+	box-sizing: border-box;
 }
 
 @keyframes bcn-liveplus {
@@ -140,7 +170,7 @@
 }
 @keyframes bcn-amberpulse {
 	0% {
-		box-shadow: 0 0 0 0 rgba(255, 197, 61, 0.35);
+		box-shadow: 0 0 0 0 var(--amber-a6);
 	}
 	70% {
 		box-shadow: 0 0 0 5px transparent;

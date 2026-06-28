@@ -106,6 +106,10 @@ export class DiscoveryManager {
 		return this.store.snapshot();
 	}
 
+	getStatus(): DiscoveryStatus {
+		return { live: this.live, scanning: false };
+	}
+
 	private handleSourceEvent(e: SourceEvent): void {
 		if (e.type !== "down") this.healthCheck?.noteActivity();
 		const delta = e.type === "down" ? this.store.markDown(e.key, this.now()) : this.store.upsert(e.service, this.now());

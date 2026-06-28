@@ -40,13 +40,13 @@ export function ViewMenu({ defaultOpen }: { defaultOpen?: boolean } = {}) {
 
 	return (
 		<DropdownMenu.Root defaultOpen={defaultOpen}>
-			<DropdownMenu.Trigger>
-				<Tooltip content="View options">
+			<Tooltip content="View options">
+				<DropdownMenu.Trigger>
 					<IconButton variant="ghost" size="2" aria-label="View options">
 						<ViewOptions />
 					</IconButton>
-				</Tooltip>
-			</DropdownMenu.Trigger>
+				</DropdownMenu.Trigger>
+			</Tooltip>
 			<DropdownMenu.Content style={{ width: 236 }}>
 				<DropdownMenu.Label>Sort by</DropdownMenu.Label>
 				<DropdownMenu.RadioGroup value={sortBy} onValueChange={(v) => setSortBy(v as SortBy)}>

@@ -63,11 +63,18 @@ export function registerDiscoveryIpc(win: BrowserWindow): void {
 			hasLoadedOnce = true;
 			for (const m of pending.splice(0)) if (!wc.isDestroyed()) wc.send(m.channel, m.payload);
 		} else {
-			// Reload: the renderer store was reset. Discard deltas buffered during the
-			// navigation gap (they are relative to the old state) and send one fresh,
-			// complete snapshot so the rebuilt store is consistent.
+			// Reload: the renderer store was reset to its defaults (status.live: false).
+			// Discard deltas buffered during the navigation gap (they are relative to the
+			// old state) and resend a fresh snapshot AND the current status so the rebuilt
+			// store matches the manager. Omitting the status here desynced the two — the
+			// renderer showed "Paused" while the manager was live, and resume was a no-op
+			// because setLive(true) early-returns when already live. The common trigger is
+			// Vite's first-run dependency-optimize reload, which lands on this branch.
 			pending.length = 0;
-			if (!wc.isDestroyed()) wc.send(IPC.snapshot, manager.getSnapshot());
+			if (!wc.isDestroyed()) {
+				wc.send(IPC.snapshot, manager.getSnapshot());
+				wc.send(IPC.status, manager.getStatus());
+			}
 		}
 	});
 

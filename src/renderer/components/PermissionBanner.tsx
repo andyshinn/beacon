@@ -1,3 +1,4 @@
+import { ClearX } from "../lib/icons";
 import { useDiscoveryStore } from "../store/discoveryStore";
 import styles from "./PermissionBanner.module.css";
 
@@ -18,7 +19,7 @@ export function PermissionBanner() {
 				Open Settings
 			</button>
 			<button type="button" className={`${styles.close} bcn-no-drag`} aria-label="Dismiss" onClick={dismiss}>
-				×
+				<ClearX />
 			</button>
 		</div>
 	);

@@ -152,4 +152,15 @@ describe("DiscoveryManager", () => {
 		expect(source.expireCalls).toBe(before); // interval stopped
 		expect(mgr.getSnapshot().instances).toHaveLength(1); // model preserved
 	});
+
+	it("getStatus reflects the current live state for reload resync", () => {
+		const source = new FakeSource();
+		const { onEvent } = collector();
+		const mgr = new DiscoveryManager({ source, onEvent });
+		expect(mgr.getStatus()).toEqual({ live: false, scanning: false });
+		mgr.start();
+		expect(mgr.getStatus()).toEqual({ live: true, scanning: false });
+		mgr.setLive(false);
+		expect(mgr.getStatus()).toEqual({ live: false, scanning: false });
+	});
 });

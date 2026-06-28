@@ -11,7 +11,7 @@
 	background: var(--gray-12);
 	color: var(--gray-1);
 	border-radius: 9px;
-	box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+	box-shadow: 0 12px 32px -8px var(--black-a7);
 	font-size: 12.5px;
 	font-weight: 550;
 	animation: bcn-popin 0.16s ease;

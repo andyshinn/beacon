@@ -10,7 +10,13 @@
 .spacer {
 	flex: 1;
 }
-.spin {
+/* Always inline-flex so the wrapped SVG centers inside the IconButton exactly
+   like the unwrapped icons (ViewMenu, appearance). Without this the idle (non-
+   spinning) span is a plain inline box and the icon drops to the text baseline,
+   misaligning the rescan button against its neighbors. */
+.refreshIcon {
 	display: inline-flex;
+}
+.spin {
 	animation: bcn-spin 0.8s linear infinite;
 }

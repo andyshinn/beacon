@@ -38,12 +38,21 @@ describe("Toolbar", () => {
 	});
 	it("updates the query as the search field changes", () => {
 		renderToolbar();
-		fireEvent.change(screen.getByPlaceholderText("Search services, hosts, IPs…"), { target: { value: "hue" } });
+		fireEvent.change(screen.getByPlaceholderText("Search"), { target: { value: "hue" } });
 		expect(useDiscoveryStore.getState().query).toBe("hue");
 	});
 	it("rescans on the rescan button", () => {
 		renderToolbar();
 		fireEvent.click(screen.getByRole("button", { name: "Rescan network" }));
 		expect(window.beacon.rescan).toHaveBeenCalled();
+	});
+	it("clears the query when the clear button is clicked", () => {
+		useDiscoveryStore.setState({ query: "hue", status: { live: true, scanning: false } });
+		renderToolbar();
+		const clear = screen.getByRole("button", { name: "Clear search" });
+		// Must stay out of the title-bar drag region, or the OS swallows the click as a window drag.
+		expect(clear.className).toContain("bcn-no-drag");
+		fireEvent.click(clear);
+		expect(useDiscoveryStore.getState().query).toBe("");
 	});
 });

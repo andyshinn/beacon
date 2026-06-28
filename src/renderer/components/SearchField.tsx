@@ -10,7 +10,7 @@ export function SearchField() {
 		<TextField.Root
 			id="beacon-search"
 			size="2"
-			placeholder="Search services, hosts, IPs…"
+			placeholder="Search"
 			spellCheck={false}
 			value={query}
 			onChange={(e) => setQuery(e.target.value)}
@@ -24,8 +24,17 @@ export function SearchField() {
 					<button
 						type="button"
 						aria-label="Clear search"
+						className="bcn-no-drag"
 						onClick={() => clearSearch()}
-						style={{ all: "unset", cursor: "pointer", color: "var(--gray-10)", display: "flex" }}
+						style={{
+							display: "flex",
+							border: 0,
+							margin: 0,
+							padding: 0,
+							background: "none",
+							cursor: "pointer",
+							color: "var(--gray-10)",
+						}}
 					>
 						<ClearX />
 					</button>
