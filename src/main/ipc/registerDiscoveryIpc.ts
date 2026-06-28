@@ -7,6 +7,7 @@ import { BonjourSource } from "../discovery/sources/BonjourSource";
 export function registerDiscoveryIpc(win: BrowserWindow): void {
 	const wc = win.webContents;
 	let ready = false;
+	let hasLoadedOnce = false;
 	const pending: Array<{ channel: string; payload: unknown }> = [];
 
 	const push = (channel: string, payload: unknown): void => {
@@ -26,7 +27,11 @@ export function registerDiscoveryIpc(win: BrowserWindow): void {
 
 	const manager = new DiscoveryManager({ source: new BonjourSource(), onEvent });
 
-	// Commands
+	// Commands. NOTE: ipcMain.handle is process-global while the manager is per-window.
+	// Beacon is single-window; the "closed" cleanup below removes these handlers, and
+	// main.ts's activate guard only recreates a window when none exist, so close->reopen
+	// re-registers cleanly. A future multi-window build (Plan 3/4) must route per-window
+	// or use a shared singleton manager instead of re-registering globals.
 	ipcMain.handle(IPC.rescan, () => manager.rescan());
 	ipcMain.handle(IPC.setLive, (_e, on: unknown) => manager.setLive(Boolean(on)));
 	ipcMain.handle(IPC.resolve, (_e, key: unknown) => {
@@ -43,11 +48,16 @@ export function registerDiscoveryIpc(win: BrowserWindow): void {
 	});
 	wc.on("did-finish-load", () => {
 		ready = true;
-		if (pending.length) {
+		if (!hasLoadedOnce) {
+			// First load: flush the initial snapshot/status buffered from manager.start().
+			hasLoadedOnce = true;
 			for (const m of pending.splice(0)) if (!wc.isDestroyed()) wc.send(m.channel, m.payload);
 		} else {
-			// reload: rebuild the freshly-reset renderer store
-			push(IPC.snapshot, manager.getSnapshot());
+			// Reload: the renderer store was reset. Discard deltas buffered during the
+			// navigation gap (they are relative to the old state) and send one fresh,
+			// complete snapshot so the rebuilt store is consistent.
+			pending.length = 0;
+			if (!wc.isDestroyed()) wc.send(IPC.snapshot, manager.getSnapshot());
 		}
 	});
 
