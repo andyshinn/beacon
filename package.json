@@ -1,9 +1,14 @@
 {
+	"name": "beacon",
+	"productName": "Beacon",
+	"version": "0.1.0",
+	"description": "mDNS / Bonjour / DNS-SD discovery browser",
+	"author": "Andy Shinn",
+	"license": "MIT",
 	"main": ".vite/build/main.js",
 	"dependencies": {
 		"@radix-ui/themes": "^3.3.0",
 		"bonjour-service": "^1.4.2",
-		"electron": "^42.5.0",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",
 		"zustand": "^5.0.14"
@@ -27,6 +32,7 @@
 		"@types/react": "^19.2.17",
 		"@types/react-dom": "^19.2.3",
 		"@vitejs/plugin-react": "^4.7.0",
+		"electron": "^42.5.0",
 		"happy-dom": "^15.11.7",
 		"tsx": "^4.19.0",
 		"typescript": "^5.6.0",
