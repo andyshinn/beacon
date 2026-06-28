@@ -129,15 +129,11 @@ function serviceRow(it: Instance, hostName: string | undefined): ServiceRow {
 	return { id: it.key, title: it.serviceType, subtitle: it.name !== hostName ? it.name : undefined, port: it.port };
 }
 
-// Accept both the canonical "svc" SelectionKind and the "service" alias used by detail-pane routing.
-type SelectionLike = Selection | { kind: "service"; id: string };
-
-export function buildDetail(selection: SelectionLike | null, ctx: DetailCtx): DetailModel | null {
+export function buildDetail(selection: Selection | null, ctx: DetailCtx): DetailModel | null {
 	if (!selection) return null;
 	if (selection.kind === "inst") return instanceDetail(selection.id, ctx);
 	if (selection.kind === "host") return hostDetail(selection.id, ctx);
-	// "svc" is the canonical SelectionKind; accept "service" as a string alias used in tests/detail pane routing
-	if (selection.kind === "svc" || (selection.kind as string) === "service") return serviceDetail(selection.id, ctx);
+	if (selection.kind === "svc") return serviceDetail(selection.id, ctx);
 	return ipDetail(selection.id, ctx);
 }
 
