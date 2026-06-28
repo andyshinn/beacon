@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow, type Rectangle, screen } from "electron";
+import { installAppMenu } from "./installAppMenu";
 import { registerDiscoveryIpc } from "./ipc/registerDiscoveryIpc";
 import { loadWindowState, manageWindow, type WindowStateIo } from "./windowState";
 
@@ -88,6 +89,8 @@ function createWindow(): void {
 		else if (direction === "right") goForward();
 	});
 	registerDiscoveryIpc(win);
+	const disposeMenu = installAppMenu(win);
+	win.on("closed", () => disposeMenu());
 	if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
 		void win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
 	} else {
