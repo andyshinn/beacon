@@ -1,0 +1,62 @@
+import { type BrowserWindow, ipcMain, shell } from "electron";
+import { IPC } from "../../shared/ipc";
+import type { ManagerEvent } from "../discovery/DiscoveryManager";
+import { DiscoveryManager } from "../discovery/DiscoveryManager";
+import { BonjourSource } from "../discovery/sources/BonjourSource";
+
+export function registerDiscoveryIpc(win: BrowserWindow): void {
+	const wc = win.webContents;
+	let ready = false;
+	const pending: Array<{ channel: string; payload: unknown }> = [];
+
+	const push = (channel: string, payload: unknown): void => {
+		if (wc.isDestroyed()) return;
+		if (!ready) {
+			pending.push({ channel, payload });
+			return;
+		}
+		wc.send(channel, payload);
+	};
+
+	const onEvent = (e: ManagerEvent): void => {
+		if (e.type === "snapshot") push(IPC.snapshot, e.snapshot);
+		else if (e.type === "delta") push(IPC.delta, e.delta);
+		else push(IPC.status, e.status);
+	};
+
+	const manager = new DiscoveryManager({ source: new BonjourSource(), onEvent });
+
+	// Commands
+	ipcMain.handle(IPC.rescan, () => manager.rescan());
+	ipcMain.handle(IPC.setLive, (_e, on: unknown) => manager.setLive(Boolean(on)));
+	ipcMain.handle(IPC.resolve, (_e, key: unknown) => {
+		if (typeof key === "string") manager.resolve(key);
+	});
+	ipcMain.handle(IPC.getSnapshot, () => manager.getSnapshot());
+	ipcMain.handle(IPC.openExternal, async (_e, url: unknown) => {
+		if (typeof url === "string" && /^https?:\/\//i.test(url)) await shell.openExternal(url);
+	});
+
+	// Readiness: buffer until first load; re-snapshot on reload.
+	wc.on("did-start-navigation", (_e, _url, isInPlace, isMainFrame) => {
+		if (isMainFrame && !isInPlace) ready = false;
+	});
+	wc.on("did-finish-load", () => {
+		ready = true;
+		if (pending.length) {
+			for (const m of pending.splice(0)) if (!wc.isDestroyed()) wc.send(m.channel, m.payload);
+		} else {
+			// reload: rebuild the freshly-reset renderer store
+			push(IPC.snapshot, manager.getSnapshot());
+		}
+	});
+
+	win.on("closed", () => {
+		manager.stop();
+		for (const ch of [IPC.rescan, IPC.setLive, IPC.resolve, IPC.getSnapshot, IPC.openExternal]) {
+			ipcMain.removeHandler(ch);
+		}
+	});
+
+	manager.start(); // emits initial snapshot + status synchronously (buffered until load)
+}

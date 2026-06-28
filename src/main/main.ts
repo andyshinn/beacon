@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow } from "electron";
+import { registerDiscoveryIpc } from "./ipc/registerDiscoveryIpc";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -21,6 +22,7 @@ function createWindow(): void {
 			nodeIntegration: false,
 		},
 	});
+	registerDiscoveryIpc(win);
 	if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
 		void win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
 	} else {
