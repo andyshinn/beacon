@@ -1,7 +1,9 @@
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, type Rectangle, screen } from "electron";
 import { registerDiscoveryIpc } from "./ipc/registerDiscoveryIpc";
+import { loadWindowState, manageWindow, type WindowStateIo } from "./windowState";
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
@@ -10,11 +12,48 @@ declare const MAIN_WINDOW_VITE_NAME: string;
 // import.meta.url correctly whether the main bundle is emitted as ESM or CJS.
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
+function windowStateIo(): WindowStateIo {
+	const file = path.join(app.getPath("userData"), "window-state.json");
+	return {
+		read: () => {
+			try {
+				return fs.readFileSync(file, "utf8");
+			} catch {
+				return null;
+			}
+		},
+		write: (data) => {
+			try {
+				fs.writeFileSync(file, data);
+			} catch {
+				/* best-effort: a failed save must never crash the window */
+			}
+		},
+		isOnScreen: (rect: Rectangle) => {
+			try {
+				const area = screen.getDisplayMatching(rect).workArea;
+				return (
+					rect.x < area.x + area.width &&
+					rect.x + rect.width > area.x &&
+					rect.y < area.y + area.height &&
+					rect.y + rect.height > area.y
+				);
+			} catch {
+				return true;
+			}
+		},
+	};
+}
+
 function createWindow(): void {
 	const isMac = process.platform === "darwin";
+	const io = windowStateIo();
+	const saved = loadWindowState(io);
 	const win = new BrowserWindow({
-		width: 1100,
-		height: 720,
+		width: saved.width,
+		height: saved.height,
+		x: saved.x,
+		y: saved.y,
 		titleBarStyle: isMac ? "hiddenInset" : "default",
 		// hiddenInset positions the traffic lights for a standard ~28px title bar;
 		// nudge them down/right to sit centered in our taller 46px toolbar
@@ -27,6 +66,8 @@ function createWindow(): void {
 			nodeIntegration: false,
 		},
 	});
+	if (saved.isMaximized) win.maximize();
+	manageWindow(win, io);
 	registerDiscoveryIpc(win);
 	if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
 		void win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
