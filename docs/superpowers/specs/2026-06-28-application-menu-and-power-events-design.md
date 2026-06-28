@@ -82,8 +82,6 @@ Edit
 Discovery
   Rescan                              ⌘R      → rescan
   Pause Discovery                     ⌘.      → toggleLive   (label flips to "Resume Discovery")
-  ──
-  Open Local Network Settings…                → openLocalNetworkSettings   (non-mac only; mac has it in app menu)
 
 View
   ✓ Services                          ⌘1      → view:service   (radio; checkmark on active)
@@ -121,10 +119,11 @@ Window
 - **`app.setAboutPanelOptions`** is set at install time (app name, version via
   `app.getVersion()`, copyright/credits) so the About item shows real metadata.
 
-**Cross-platform.** On Windows/Linux there is no app menu, so `Quit` lives in File and
-`Open Local Network Settings…` (a macOS-only deep link) is hidden via `visible:
-process.platform === 'darwin'`. `buildMenuTemplate` takes the platform as a dep and
-emits the right shape.
+**Cross-platform.** On Windows/Linux there is no app menu, so `Quit` lives in File.
+`Open Local Network Settings…` is a macOS-only deep link tied to the darwin-only Local
+Network permission, so it appears **only** on macOS (in the app menu) and is omitted
+entirely off-mac. `buildMenuTemplate` takes the platform as a dep and emits the right
+shape.
 
 ### 1.3 Dynamic state
 
