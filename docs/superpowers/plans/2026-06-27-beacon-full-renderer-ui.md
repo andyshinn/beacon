@@ -2099,7 +2099,7 @@ export function LiveToggle() {
 	const status = useDiscoveryStore((s) => s.status);
 	const now = useDiscoveryStore((s) => s.now);
 	const pausedAt = useDiscoveryStore((s) => s.pausedAt);
-	const pausedAgeS = status.live ? 0 : Math.floor((now - pausedAt) / 1000);
+	const pausedAgeS = status.live || pausedAt === 0 ? 0 : Math.floor((now - pausedAt) / 1000);
 	const stale = staleness(status.live, pausedAgeS);
 	const dotClass = status.live ? styles.dotLive : stale === "stale" ? styles.dotStale : styles.dotPaused;
 	return (
@@ -3947,7 +3947,7 @@ export function StatusBar() {
 		return lensCounts(visible, { hosts, settings: { showDesc: true, showV6, showLinkLocal, sortBy: "name" }, query, expanded: new Set(), selection: null, now });
 	}, [instances, hosts, query, showV6, showLinkLocal, now]);
 
-	const pausedAgeS = status.live ? 0 : Math.floor((now - pausedAt) / 1000);
+	const pausedAgeS = status.live || pausedAt === 0 ? 0 : Math.floor((now - pausedAt) / 1000);
 	const stale = staleness(status.live, pausedAgeS);
 	const dotClass = status.live ? styles.dotLive : stale === "stale" ? styles.dotStale : styles.dotPaused;
 	const label = status.live ? "Live" : "Paused";
@@ -4155,7 +4155,7 @@ import { useDiscoveryStore } from "./store/discoveryStore";
 const status = useDiscoveryStore((s) => s.status);
 const now = useDiscoveryStore((s) => s.now);
 const pausedAt = useDiscoveryStore((s) => s.pausedAt);
-const stale = staleness(status.live, status.live ? 0 : Math.floor((now - pausedAt) / 1000));
+const stale = staleness(status.live, status.live || pausedAt === 0 ? 0 : Math.floor((now - pausedAt) / 1000));
 // ...
 <div className="bcn-app" data-staleness={stale} data-platform={isMac ? "mac" : undefined}>
 ```
