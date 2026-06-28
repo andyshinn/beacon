@@ -183,9 +183,9 @@ export function buildHostTree(visible: Instance[], ctx: SelectorCtx): TreeGroup[
 			return {
 				id: `host:${hid}`,
 				title: h?.displayName ?? hid,
-				subtitle: h?.hostname,
+				subtitle: primaryIp(h) ?? undefined,
 				count: list.length,
-				chip: primaryIp(h),
+				chip: null,
 				expanded,
 				selected: ctx.selection?.kind === "host" && ctx.selection.id === hid,
 				children: expanded

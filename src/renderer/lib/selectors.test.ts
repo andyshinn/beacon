@@ -118,12 +118,29 @@ describe("buildServiceTree", () => {
 });
 
 describe("buildHostTree", () => {
-	it("groups by host (sorted by display name), gray chip = primary ip, children sorted by service type", () => {
+	it("groups by host (sorted by display name); subtitle = primary ip, chip removed, children sorted by service type", () => {
 		const groups = buildHostTree(insts, ctx({ expanded: new Set(["host:mac"]) }));
 		expect(groups.map((g) => g.title)).toEqual(["Aqara Hub", "Mac Studio"]);
 		const macGroup = groups[1]!;
-		expect(macGroup.chip).toBe("10.0.0.2");
+		expect(macGroup.subtitle).toBe("10.0.0.2");
+		expect(macGroup.chip).toBeNull();
 		expect(macGroup.children.map((c) => c.title)).toEqual(["_airplay._tcp", "_ssh._tcp"]);
+	});
+	it("host subtitle is undefined when the host has no known address", () => {
+		const ghost: Host = {
+			id: "ghost",
+			displayName: "Ghost",
+			hostname: "Ghost.local.",
+			addresses: [],
+			firstSeen: 0,
+			lastSeen: 0,
+			present: true,
+		};
+		const ghostHosts = new Map<string, Host>([["ghost", ghost]]);
+		const ghostInsts = [i({ key: "g", name: "Ghost", serviceType: "_http._tcp", hostId: "ghost" })];
+		const groups = buildHostTree(ghostInsts, ctx({ hosts: ghostHosts }));
+		expect(groups[0]!.subtitle).toBeUndefined();
+		expect(groups[0]!.chip).toBeNull();
 	});
 	it("child subtitle appears only when instance name differs from host name", () => {
 		const groups = buildHostTree(insts, ctx({ expanded: new Set(["host:mac"]) }));
