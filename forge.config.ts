@@ -16,10 +16,14 @@ import { keepInPackage } from "./scripts/packageIgnore";
 // Windows/Linux bundles). Generated from logo/beacon.icon by `pnpm icons`.
 const macIconCatalog = process.platform === "darwin" ? ["build/Assets.car"] : [];
 
-// macOS code signing — opt-in. Undefined when APPLE_SIGNING_IDENTITY is unset,
-// so `pnpm make` still packages unsigned (contributors, forks, CI without
-// secrets). In CI the identity is provided as a secret.
-const osxSign = process.env.APPLE_SIGNING_IDENTITY ? { identity: process.env.APPLE_SIGNING_IDENTITY } : undefined;
+// macOS code signing always runs so the universal (x64+arm64) stitch works on
+// Apple Silicon hosts/runners — @electron/universal cannot merge a fully-unsigned
+// universal app there (the arm64 slice gets auto ad-hoc-signed, the x64 slice does
+// not, and their file trees then differ). With APPLE_SIGNING_IDENTITY set (CI) this
+// is a real Developer ID sign; otherwise it's ad-hoc ("-"), which needs no
+// certificate and keeps `pnpm make:mac` working for contributors and unsigned/fork
+// CI builds. Notarization stays separately gated on the API-key vars below.
+const osxSign = { identity: process.env.APPLE_SIGNING_IDENTITY ?? "-" };
 
 // macOS notarization — opt-in, only when all three App Store Connect API-key
 // vars are present. APPLE_API_KEY is a PATH to the .p8 (the CI action writes it).
