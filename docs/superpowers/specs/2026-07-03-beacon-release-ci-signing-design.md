@@ -53,7 +53,8 @@ import { PublisherGitHub } from "@electron-forge/publisher-github"; // NB: capit
 // macOS signing always runs so the universal stitch works on Apple Silicon
 // (a fully-unsigned universal build can't be merged there). Real Developer ID
 // when APPLE_SIGNING_IDENTITY is set (CI); ad-hoc ("-", no cert) otherwise.
-const osxSign = { identity: process.env.APPLE_SIGNING_IDENTITY ?? "-" };
+// `||` not `??`: an absent CI secret is an empty string, not undefined.
+const osxSign = { identity: process.env.APPLE_SIGNING_IDENTITY || "-" };
 
 // macOS notarization — opt-in, only when all three App Store Connect API-key
 // vars are present. APPLE_API_KEY is a PATH to the .p8 (the CI action writes it).

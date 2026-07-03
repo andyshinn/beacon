@@ -292,7 +292,10 @@ Directly below the `macIconCatalog` const added in Task 2, add:
 // is a real Developer ID sign; otherwise it's ad-hoc ("-"), which needs no
 // certificate and keeps `pnpm make:mac` working for contributors and unsigned/fork
 // CI builds. Notarization stays separately gated on the API-key vars below.
-const osxSign = { identity: process.env.APPLE_SIGNING_IDENTITY ?? "-" };
+// NB: `||` not `??` — an absent CI secret is an empty string, not undefined,
+// and `"" ?? "-"` would leave identity="" (osx-sign then errors); `"" || "-"`
+// correctly falls back to ad-hoc.
+const osxSign = { identity: process.env.APPLE_SIGNING_IDENTITY || "-" };
 
 // macOS notarization — opt-in, only when all three App Store Connect API-key
 // vars are present. APPLE_API_KEY is a PATH to the .p8 (the CI action writes it).
