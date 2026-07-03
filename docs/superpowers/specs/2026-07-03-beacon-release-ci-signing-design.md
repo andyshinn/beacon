@@ -137,7 +137,8 @@ export function initAutoUpdate(): void {
 Call it once from `app.whenReady()` in `src/main/main.ts` (alongside `setAboutPanelOptions` / `createWindow`).
 
 Notes:
-- `update-electron-app` is CJS; Beacon's main is bundled by Vite so the CJS import resolves. **Verify the import form** (`import updateElectronApp from …` vs `createRequire`) during implementation.
+- **Import form (resolved):** `import { updateElectronApp } from "update-electron-app"` — the named ESM import resolves from the CJS module (verified).
+- **Externalize + ship (resolved):** `update-electron-app` is CommonJS and `require("electron")`/builtins at load; bundling it into Beacon's ESM main would rewrite those requires to a throwing shim (the same reason `bonjour-service` is external in `vite.main.config.mts`). So it is added to the Vite `external` list and its runtime closure ships unbundled via `keepInPackage`. Closure (verified via `npm ls`): `update-electron-app`, `github-url-to-object`, `is-url`, `ms`.
 - macOS auto-update only works with a **signed + notarized** app served as a `.zip` (Squirrel.Mac). Windows uses the Squirrel.Windows `RELEASES`/`.nupkg`. Linux is not covered (expected).
 
 ### 4.3 `package.json`
@@ -292,7 +293,6 @@ Prerelease tags (with a hyphen, e.g. `v0.2.0-beta.1`) publish immediately as pre
 
 - **Forge 8.0.0-alpha.9 compat:** confirm `osxUniversal`, `osxSign`, `osxNotarize`, `windowsSign.hookModulePath`, and `extraResource` are honored by the alpha's bundled `@electron/packager`. (They are standard packager options; low risk but alpha.)
 - **Linux `bin` option:** verify `bin: "Beacon"` matches the packaged executable so deb/rpm makers succeed.
-- **`update-electron-app` import** under `"type": "module"` + Vite bundling — confirm the working import form.
 - **Universal zip + `update.electronjs.org` arch matching** — confirm the single universal `.zip` satisfies both `arch=arm64` and `arch=x64` update requests.
 
 ## 9. Out of scope
