@@ -15,6 +15,12 @@ export const RUNTIME_DEPS = [
 	"thunky",
 	"fast-deep-equal",
 	"@leichtgewicht/ip-codec",
+	// update-electron-app auto-update closure. Externalized in vite.main.config.mts
+	// (CJS, requires electron/builtins), so it must ship unbundled like bonjour-service.
+	"update-electron-app",
+	"github-url-to-object",
+	"is-url",
+	"ms",
 ] as const;
 
 export function keepInPackage(file: string): boolean {

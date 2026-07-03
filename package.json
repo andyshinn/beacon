@@ -23,6 +23,7 @@
 		"bonjour-service": "^1.4.2",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",
+		"update-electron-app": "^3.3.0",
 		"zustand": "^5.0.14"
 	},
 	"devDependencies": {

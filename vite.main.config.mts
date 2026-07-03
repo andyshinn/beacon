@@ -8,7 +8,13 @@ import { defineConfig } from "vite";
 // lets Node load them from node_modules (electron + node builtins are external
 // for the same reason). The package stays runnable because it's listed under
 // package.json "dependencies", so Forge ships it unbundled into the app.
-const external = ["electron", "bonjour-service", ...builtinModules, ...builtinModules.map((m) => `node:${m}`)];
+const external = [
+	"electron",
+	"bonjour-service",
+	"update-electron-app",
+	...builtinModules,
+	...builtinModules.map((m) => `node:${m}`),
+];
 
 export default defineConfig({
 	// Defining build.lib ourselves stops @electron-forge/plugin-vite from

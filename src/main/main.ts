@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow, type Rectangle, screen } from "electron";
+import { updateElectronApp } from "update-electron-app";
+import { initAutoUpdate } from "./autoUpdate";
 import { installAppMenu } from "./installAppMenu";
 import { registerDiscoveryIpc } from "./ipc/registerDiscoveryIpc";
 import { loadWindowState, manageWindow, type WindowStateIo } from "./windowState";
@@ -106,6 +108,8 @@ app.whenReady().then(() => {
 		copyright: "© 2026 Andy Shinn",
 		credits: "mDNS / Bonjour / DNS-SD discovery browser",
 	});
+	// Auto-update against update.electronjs.org (packaged builds only; no-ops in dev).
+	initAutoUpdate({ isPackaged: app.isPackaged, start: () => updateElectronApp() });
 	createWindow();
 	app.on("activate", () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
