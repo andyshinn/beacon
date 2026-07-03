@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
 import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerDMG } from "@electron-forge/maker-dmg";
@@ -7,12 +8,35 @@ import { MakerZIP } from "@electron-forge/maker-zip";
 import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-natives";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { VitePlugin } from "@electron-forge/plugin-vite";
+import { PublisherGitHub } from "@electron-forge/publisher-github";
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { keepInPackage } from "./scripts/packageIgnore";
 
 // Ship the compiled Liquid Glass asset catalog only on macOS (dead weight in
 // Windows/Linux bundles). Generated from logo/beacon.icon by `pnpm icons`.
 const macIconCatalog = process.platform === "darwin" ? ["build/Assets.car"] : [];
+
+// macOS code signing — opt-in. Undefined when APPLE_SIGNING_IDENTITY is unset,
+// so `pnpm make` still packages unsigned (contributors, forks, CI without
+// secrets). In CI the identity is provided as a secret.
+const osxSign = process.env.APPLE_SIGNING_IDENTITY ? { identity: process.env.APPLE_SIGNING_IDENTITY } : undefined;
+
+// macOS notarization — opt-in, only when all three App Store Connect API-key
+// vars are present. APPLE_API_KEY is a PATH to the .p8 (the CI action writes it).
+const osxNotarize =
+	process.env.APPLE_API_KEY && process.env.APPLE_API_KEY_ID && process.env.APPLE_API_ISSUER
+		? {
+				appleApiKey: process.env.APPLE_API_KEY,
+				appleApiKeyId: process.env.APPLE_API_KEY_ID,
+				appleApiIssuer: process.env.APPLE_API_ISSUER,
+			}
+		: undefined;
+
+// Windows signing — opt-in, only when WINDOWS_SIGN is set (Azure Trusted Signing
+// via scripts/windows-sign.cjs). Passed to both packagerConfig and MakerSquirrel.
+const windowsSign = process.env.WINDOWS_SIGN
+	? { hookModulePath: join(process.cwd(), "scripts", "windows-sign.cjs") }
+	: undefined;
 
 const config: ForgeConfig = {
 	packagerConfig: {
@@ -32,17 +56,28 @@ const config: ForgeConfig = {
 			// `actool --app-icon` value used to build build/Assets.car.
 			CFBundleIconName: "beacon",
 		},
+		// Stitch x64+arm64 into one universal .app; mergeASARs lets the Fuses
+		// plugin skip its arch-specific ad-hoc resign so osx-sign signs once.
+		osxUniversal: { mergeASARs: true },
+		osxSign,
+		osxNotarize,
+		windowsSign,
 		// Override the Vite plugin's strip-everything ignore so the externalized bonjour-service
 		// closure ships (see scripts/packageIgnore.ts). The plugin respects a user-set function ignore.
 		ignore: (file: string) => !keepInPackage(file),
 	},
 	rebuildConfig: {},
 	makers: [
-		new MakerSquirrel({}),
+		new MakerSquirrel({ setupIcon: "build/icon.ico", windowsSign }),
 		new MakerZIP({}, ["darwin"]),
-		new MakerRpm({ options: { icon: "build/icon.png" } }),
-		new MakerDeb({ options: { icon: "build/icon.png" } }),
+		new MakerRpm({ options: { icon: "build/icon.png", bin: "Beacon" } }),
+		new MakerDeb({ options: { icon: "build/icon.png", bin: "Beacon" } }),
 		new MakerDMG({ icon: "build/icon.icns" }),
+	],
+	publishers: [
+		// Defined for parity + a local `pnpm publish` path; CI drives releases with
+		// softprops/action-gh-release instead.
+		new PublisherGitHub({ repository: { owner: "andyshinn", name: "beacon" }, draft: true }),
 	],
 	plugins: [
 		new AutoUnpackNativesPlugin({}),
