@@ -10,22 +10,40 @@ import { VitePlugin } from "@electron-forge/plugin-vite";
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { keepInPackage } from "./scripts/packageIgnore";
 
+// Ship the compiled Liquid Glass asset catalog only on macOS (dead weight in
+// Windows/Linux bundles). Generated from logo/beacon.icon by `pnpm icons`.
+const macIconCatalog = process.platform === "darwin" ? ["build/Assets.car"] : [];
+
 const config: ForgeConfig = {
 	packagerConfig: {
 		asar: true,
+		// electron-packager appends the per-platform extension: build/icon.icns (mac),
+		// build/icon.ico (win). Generated from the brand master via `pnpm icons`.
+		icon: "build/icon",
 		appBundleId: "com.andyshinn.beacon",
+		// build/Assets.car -> Contents/Resources/Assets.car (macOS 26 Liquid Glass).
+		extraResource: [...macIconCatalog],
 		extendInfo: {
 			// macOS Sequoia (15+) gates mDNS behind the Local Network TCC permission, even for
 			// a packaged double-clicked .app. This string is shown in the system permission prompt.
 			NSLocalNetworkUsageDescription:
 				"Beacon scans your local network to discover Bonjour and mDNS services so it can show the devices around you.",
+			// macOS 26+ reads the app icon from Assets.car via this name; must match the
+			// `actool --app-icon` value used to build build/Assets.car.
+			CFBundleIconName: "beacon",
 		},
 		// Override the Vite plugin's strip-everything ignore so the externalized bonjour-service
 		// closure ships (see scripts/packageIgnore.ts). The plugin respects a user-set function ignore.
 		ignore: (file: string) => !keepInPackage(file),
 	},
 	rebuildConfig: {},
-	makers: [new MakerSquirrel({}), new MakerZIP({}, ["darwin"]), new MakerRpm({}), new MakerDeb({}), new MakerDMG({})],
+	makers: [
+		new MakerSquirrel({}),
+		new MakerZIP({}, ["darwin"]),
+		new MakerRpm({ options: { icon: "build/icon.png" } }),
+		new MakerDeb({ options: { icon: "build/icon.png" } }),
+		new MakerDMG({ icon: "build/icon.icns" }),
+	],
 	plugins: [
 		new AutoUnpackNativesPlugin({}),
 		new VitePlugin({
