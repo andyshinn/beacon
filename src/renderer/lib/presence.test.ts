@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Host, Instance } from "../../shared/types";
-import { addrAllowed, ageLabel, cmpIp, isLeft, isNew, primaryIp, relativeLastSeen, staleness, trunc } from "./presence";
+import { addrAllowed, cmpIp, isLeft, isNew, primaryIp, relativeLastSeen, trunc } from "./presence";
 
 function host(addrs: Host["addresses"]): Host {
 	return { id: "h", displayName: "H", hostname: "H.local.", addresses: addrs, firstSeen: 0, lastSeen: 0, present: true };
@@ -58,17 +58,7 @@ describe("cmpIp", () => {
 	});
 });
 
-describe("staleness / ageLabel / trunc / relativeLastSeen / addrAllowed", () => {
-	it("derives staleness from live + paused age", () => {
-		expect(staleness(true, 99)).toBe("fresh");
-		expect(staleness(false, 3)).toBe("fresh");
-		expect(staleness(false, 5)).toBe("aging");
-		expect(staleness(false, 12)).toBe("stale");
-	});
-	it("formats age as m:ss", () => {
-		expect(ageLabel(9)).toBe("0:09");
-		expect(ageLabel(75)).toBe("1:15");
-	});
+describe("trunc / relativeLastSeen / addrAllowed", () => {
 	it("truncates long labels at 44 chars", () => {
 		expect(trunc("x".repeat(50))).toBe(`${"x".repeat(42)}…`);
 		expect(trunc("short")).toBe("short");

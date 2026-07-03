@@ -10,7 +10,6 @@ beforeEach(() => {
 		toast: null,
 		query: "",
 		now: 0,
-		pausedAt: 0,
 	});
 	window.beacon = {
 		setLive: vi.fn().mockResolvedValue(undefined),

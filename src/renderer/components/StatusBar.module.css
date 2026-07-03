@@ -10,10 +10,6 @@
 .dotPaused {
 	background: var(--gray-8);
 }
-.dotStale {
-	background: var(--amber-9);
-	animation: bcn-amberpulse 1.6s infinite;
-}
 .label {
 	color: var(--gray-11);
 	font-weight: 550;

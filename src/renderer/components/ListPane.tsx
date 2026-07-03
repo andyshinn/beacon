@@ -101,7 +101,7 @@ export function ListPane() {
 				)}
 			</div>
 			<ScrollArea className="bcn-scroll" type="hover" scrollbars="vertical" scrollHideDelay={500}>
-				<div className="bcn-scroll-content" style={{ padding: "6px 6px 14px" }}>
+				<div className="bcn-scroll-content" style={{ padding: "6px 16px 14px 6px" }}>
 					{body}
 				</div>
 			</ScrollArea>

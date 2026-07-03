@@ -1,8 +1,6 @@
 import type { AddrFamily, Host, Instance } from "../../shared/types";
 
 export const NEW_WINDOW_MS = 6000;
-export const AGING_AGE_S = 5;
-export const STALE_AGE_S = 12;
 
 const FAMILY_ORDER: Record<AddrFamily, number> = { ipv4: 0, ipv6: 1, linklocal: 2, loopback: 3 };
 
@@ -39,20 +37,6 @@ export function cmpIp(a: string | null, b: string | null): number {
 
 export function trunc(s: string): string {
 	return s.length > 44 ? `${s.slice(0, 42)}…` : s;
-}
-
-export type Staleness = "fresh" | "aging" | "stale";
-export function staleness(live: boolean, pausedAgeS: number): Staleness {
-	if (live) return "fresh";
-	if (pausedAgeS >= STALE_AGE_S) return "stale";
-	if (pausedAgeS >= AGING_AGE_S) return "aging";
-	return "fresh";
-}
-
-export function ageLabel(seconds: number): string {
-	const m = Math.floor(seconds / 60);
-	const s = seconds % 60;
-	return `${m}:${s < 10 ? "0" : ""}${s}`;
 }
 
 export function relativeLastSeen(lastSeen: number, now: number, present: boolean): string {

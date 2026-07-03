@@ -100,6 +100,12 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
 	console.log("[beacon] main process ready");
+	app.setAboutPanelOptions({
+		applicationName: "Beacon",
+		applicationVersion: app.getVersion(),
+		copyright: "© 2026 Andy Shinn",
+		credits: "mDNS / Bonjour / DNS-SD discovery browser",
+	});
 	createWindow();
 	app.on("activate", () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();

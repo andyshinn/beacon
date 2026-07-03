@@ -35,7 +35,6 @@ beforeEach(() => {
 		instances: new Map([["k", i]]),
 		query: "",
 		now: 0,
-		pausedAt: 0,
 		status: { live: true, scanning: false },
 	});
 });
@@ -47,9 +46,11 @@ describe("StatusBar", () => {
 		expect(screen.getByText("1 hosts · 1 service types · 1 instances · 1 addresses")).toBeTruthy();
 		expect(screen.getByText("Updated just now")).toBeTruthy();
 	});
-	it("shows a stale snapshot label when paused beyond the stale threshold", () => {
-		useDiscoveryStore.setState({ status: { live: false, scanning: false }, pausedAt: 1000, now: 16000 });
+	it("shows Paused with no elapsed timer when not live", () => {
+		useDiscoveryStore.setState({ status: { live: false, scanning: false } });
 		render(<StatusBar />);
-		expect(screen.getByText("Snapshot stale · 0:15 old")).toBeTruthy();
+		expect(screen.getByText("Paused")).toBeTruthy();
+		expect(screen.getByText("Snapshot paused")).toBeTruthy();
+		expect(screen.queryByText(/\d+:\d{2}/)).toBeNull();
 	});
 });

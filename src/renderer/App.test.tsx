@@ -38,11 +38,17 @@ describe("App shell", () => {
 		expect(container.querySelector(".bcn-list-pane")).toBeTruthy();
 		expect(container.querySelector(".bcn-detail-pane")).toBeTruthy();
 		expect(container.querySelector(".bcn-status-bar")).toBeTruthy();
-		expect(screen.getByText("Beacon")).toBeTruthy();
+		expect(screen.getByRole("img", { name: "Beacon" })).toBeTruthy();
 	});
 
-	it("defaults the staleness attribute to fresh", () => {
+	it("does not mark the app paused while live", () => {
 		const { container } = renderApp();
-		expect(container.querySelector(".bcn-app")?.getAttribute("data-staleness")).toBe("fresh");
+		expect(container.querySelector(".bcn-app")?.getAttribute("data-paused")).toBeNull();
+	});
+
+	it("marks the app paused when discovery is paused", () => {
+		useDiscoveryStore.setState({ status: { live: false, scanning: false } });
+		const { container } = renderApp();
+		expect(container.querySelector(".bcn-app")?.getAttribute("data-paused")).toBe("true");
 	});
 });

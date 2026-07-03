@@ -37,7 +37,6 @@ beforeEach(() => {
 		selection: null,
 		query: "",
 		expanded: new Set(),
-		pausedAt: 0,
 		now: 0,
 		toast: null,
 		permissionHint: false,
@@ -57,14 +56,13 @@ describe("data", () => {
 	});
 });
 
-describe("status → pausedAt", () => {
-	it("records pausedAt at current now when live falls, clears on resume", () => {
+describe("applyStatus", () => {
+	it("records the latest live state", () => {
 		const s = useDiscoveryStore.getState();
-		s.tick(5000);
 		s.applyStatus({ live: false, scanning: false });
-		expect(useDiscoveryStore.getState().pausedAt).toBe(5000);
+		expect(useDiscoveryStore.getState().status.live).toBe(false);
 		s.applyStatus({ live: true, scanning: false });
-		expect(useDiscoveryStore.getState().pausedAt).toBe(0);
+		expect(useDiscoveryStore.getState().status.live).toBe(true);
 	});
 });
 

@@ -29,6 +29,10 @@ beforeEach(() => {
 });
 
 describe("Toolbar", () => {
+	it("shows the Beacon brand lockup", () => {
+		renderToolbar();
+		expect(screen.getByRole("img", { name: "Beacon" })).toBeTruthy();
+	});
 	it("switches lens when a segment is clicked", () => {
 		renderToolbar();
 		// Radix SegmentedControl renders two label spans per item; click the first.

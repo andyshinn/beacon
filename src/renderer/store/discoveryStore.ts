@@ -14,7 +14,6 @@ interface DiscoveryState {
 	selection: Selection | null;
 	query: string;
 	expanded: Set<string>;
-	pausedAt: number;
 	now: number;
 	toast: string | null;
 	permissionHint: boolean;
@@ -47,7 +46,6 @@ export const useDiscoveryStore = create<DiscoveryState>((set) => ({
 	selection: null,
 	query: "",
 	expanded: new Set(),
-	pausedAt: 0,
 	now: 0,
 	toast: null,
 	permissionHint: false,
@@ -69,17 +67,7 @@ export const useDiscoveryStore = create<DiscoveryState>((set) => ({
 			return { hosts, instances };
 		}),
 
-	applyStatus: (status) =>
-		set((s) => {
-			// pausedAt: 0 is the "never paused" sentinel; on entering pause we stamp it with the
-			// current clock (s.now), and clear it to 0 on resume. Consumers (LiveToggle/StatusBar/App)
-			// treat pausedAt === 0 as age 0 to avoid a boot-time "stale" flash before the first
-			// onStatus(live:true) arrives — do not remove that guard or this stamping.
-			let pausedAt = s.pausedAt;
-			if (status.live) pausedAt = 0;
-			else if (pausedAt === 0) pausedAt = s.now;
-			return { status, pausedAt };
-		}),
+	applyStatus: (status) => set({ status }),
 
 	tick: (now) => set({ now }),
 

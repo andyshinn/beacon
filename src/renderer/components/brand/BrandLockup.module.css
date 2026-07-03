@@ -1,0 +1,9 @@
+.lockup {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	/* wordmark renders in currentColor; inherit the toolbar text colour so it
+	   flips with the light/dark appearance toggle */
+	color: var(--gray-12);
+	padding-left: 2px;
+}

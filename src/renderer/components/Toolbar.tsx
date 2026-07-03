@@ -3,6 +3,7 @@ import { rescan } from "../lib/commands";
 import { Refresh, Sun } from "../lib/icons";
 import { useDiscoveryStore } from "../store/discoveryStore";
 import { type Lens, useSettingsStore } from "../store/settingsStore";
+import { BeaconLockup } from "./brand/BrandLockup";
 import { ExportMenu } from "./ExportMenu";
 import { LiveToggle } from "./LiveToggle";
 import { SearchField } from "./SearchField";
@@ -23,12 +24,7 @@ export function Toolbar() {
 	const scanning = useDiscoveryStore((s) => s.status.scanning);
 	return (
 		<>
-			<div className={styles.logoBlock}>
-				<div className="bcn-logo" />
-				<span className="bcn-title" title="mDNS / Bonjour browser">
-					Beacon
-				</span>
-			</div>
+			<BeaconLockup />
 			<LiveToggle />
 			<SegmentedControl.Root
 				size="1"

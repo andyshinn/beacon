@@ -108,46 +108,18 @@ body {
 	color: var(--gray-10);
 }
 
-.bcn-logo {
-	width: 18px;
-	height: 18px;
-	border-radius: 6px;
-	background: var(--accent-9);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-.bcn-logo::after {
-	content: "";
-	width: 6px;
-	height: 6px;
-	border-radius: 50%;
-	background: var(--white-a12);
-	box-shadow: 0 0 0 2px var(--white-a6);
-}
-.bcn-title {
-	font-weight: 650;
-	font-size: 13.5px;
-	letter-spacing: 0.01em;
-}
-
-/* Dimmable scroll panels (staleness tint). The scroll container itself is a
+/* Dimmable scroll panels (paused tint). The scroll container itself is a
    Radix <ScrollArea> (it owns the viewport + the auto-hiding custom scrollbar),
    so this class only sizes the Root to fill the pane below the header and
-   carries the staleness dimming. */
+   carries the paused dimming — the panes dim while discovery is paused to mark
+   the list as a frozen snapshot. */
 .bcn-scroll {
 	flex: 1;
 	min-height: 0;
-	transition:
-		opacity 0.8s,
-		filter 0.8s;
+	transition: opacity 0.8s;
 }
-.bcn-app[data-staleness="aging"] .bcn-scroll {
-	opacity: 0.72;
-}
-.bcn-app[data-staleness="stale"] .bcn-scroll {
-	opacity: 0.5;
-	filter: grayscale(0.4);
+.bcn-app[data-paused] .bcn-scroll {
+	opacity: 0.6;
 }
 /* Radix viewport forces `width: fit-content` on its single child to enable
    horizontal scrolling; we only scroll vertically, so let the content fill the
@@ -160,17 +132,6 @@ body {
 @keyframes bcn-liveplus {
 	0% {
 		box-shadow: 0 0 0 0 var(--green-a3);
-	}
-	70% {
-		box-shadow: 0 0 0 5px transparent;
-	}
-	100% {
-		box-shadow: 0 0 0 0 transparent;
-	}
-}
-@keyframes bcn-amberpulse {
-	0% {
-		box-shadow: 0 0 0 0 var(--amber-a6);
 	}
 	70% {
 		box-shadow: 0 0 0 5px transparent;
