@@ -30,21 +30,21 @@ const tmp = path.join(build, ".actool");
 rmSync(tmp, { recursive: true, force: true });
 mkdirSync(tmp, { recursive: true });
 execFileSync(
-	"actool",
-	[
-		iconBundle,
-		"--compile",
-		tmp,
-		"--app-icon",
-		"beacon",
-		"--output-partial-info-plist",
-		path.join(tmp, "partial.plist"),
-		"--platform",
-		"macosx",
-		"--minimum-deployment-target",
-		"11.0",
-	],
-	{ stdio: "ignore" }, // actool prints harmless dyld symbol warnings on Xcode 26
+  "actool",
+  [
+    iconBundle,
+    "--compile",
+    tmp,
+    "--app-icon",
+    "beacon",
+    "--output-partial-info-plist",
+    path.join(tmp, "partial.plist"),
+    "--platform",
+    "macosx",
+    "--minimum-deployment-target",
+    "11.0",
+  ],
+  { stdio: "ignore" }, // actool prints harmless dyld symbol warnings on Xcode 26
 );
 copyFileSync(path.join(tmp, "beacon.icns"), path.join(build, "icon.icns"));
 copyFileSync(path.join(tmp, "Assets.car"), path.join(build, "Assets.car"));

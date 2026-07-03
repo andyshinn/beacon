@@ -1,27 +1,27 @@
 .dot {
-	width: 7px;
-	height: 7px;
-	border-radius: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
 }
 .dotLive {
-	background: var(--green-9);
-	animation: bcn-liveplus 2s infinite;
+  background: var(--green-9);
+  animation: bcn-liveplus 2s infinite;
 }
 .dotPaused {
-	background: var(--gray-8);
+  background: var(--gray-8);
 }
 .label {
-	color: var(--gray-11);
-	font-weight: 550;
+  color: var(--gray-11);
+  font-weight: 550;
 }
 .divider {
-	width: 1px;
-	height: 13px;
-	background: var(--gray-a6);
+  width: 1px;
+  height: 13px;
+  background: var(--gray-a6);
 }
 .counts {
-	font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums;
 }
 .spacer {
-	flex: 1;
+  flex: 1;
 }

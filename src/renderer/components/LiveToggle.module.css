@@ -1,32 +1,32 @@
 .toggle {
-	margin-left: 4px;
-	height: 28px;
-	padding: 0 11px;
-	display: flex;
-	align-items: center;
-	gap: 7px;
-	border-radius: 8px;
-	background: var(--gray-a3);
-	border: 1px solid var(--gray-a6);
-	color: var(--gray-12);
-	cursor: pointer;
+  margin-left: 4px;
+  height: 28px;
+  padding: 0 11px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 8px;
+  background: var(--gray-a3);
+  border: 1px solid var(--gray-a6);
+  color: var(--gray-12);
+  cursor: pointer;
 }
 .toggle:hover {
-	background: var(--gray-a5);
+  background: var(--gray-a5);
 }
 .dot {
-	width: 7px;
-	height: 7px;
-	border-radius: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
 }
 .dotLive {
-	background: var(--green-9);
-	animation: bcn-liveplus 2s infinite;
+  background: var(--green-9);
+  animation: bcn-liveplus 2s infinite;
 }
 .dotPaused {
-	background: var(--gray-8);
+  background: var(--gray-8);
 }
 .label {
-	font-size: 12px;
-	font-weight: 600;
+  font-size: 12px;
+  font-weight: 600;
 }

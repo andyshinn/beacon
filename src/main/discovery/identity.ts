@@ -1,32 +1,32 @@
 function normalizeDot(name: string): string {
-	return name.endsWith(".") ? name : `${name}.`;
+  return name.endsWith(".") ? name : `${name}.`;
 }
 
 export function instanceKey(fqdn: string): string {
-	return normalizeDot(fqdn).toLowerCase();
+  return normalizeDot(fqdn).toLowerCase();
 }
 
 export function hostId(hostname: string): string {
-	return normalizeDot(hostname).toLowerCase();
+  return normalizeDot(hostname).toLowerCase();
 }
 
 export function cleanHostname(hostname: string): string {
-	return hostname.endsWith(".") ? hostname.slice(0, -1) : hostname;
+  return hostname.endsWith(".") ? hostname.slice(0, -1) : hostname;
 }
 
 const INSTANCE_RE = /^(.+)\.(_[^.]+)\.(_(tcp|udp))\.(.+\.?)$/;
 
 export function parseInstanceName(
-	fqdn: string,
+  fqdn: string,
 ): { instance: string; serviceType: string; protocol: "tcp" | "udp"; domain: string } | null {
-	const m = INSTANCE_RE.exec(normalizeDot(fqdn));
-	if (!m) return null;
-	const [, instance, app, proto, protocol, domain] = m;
-	if (!instance || !app || !proto || !protocol || !domain) return null;
-	return {
-		instance,
-		serviceType: `${app}.${proto}`,
-		protocol: protocol as "tcp" | "udp",
-		domain,
-	};
+  const m = INSTANCE_RE.exec(normalizeDot(fqdn));
+  if (!m) return null;
+  const [, instance, app, proto, protocol, domain] = m;
+  if (!instance || !app || !proto || !protocol || !domain) return null;
+  return {
+    instance,
+    serviceType: `${app}.${proto}`,
+    protocol: protocol as "tcp" | "udp",
+    domain,
+  };
 }

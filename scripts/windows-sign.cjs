@@ -19,37 +19,37 @@
 const { execFileSync } = require("node:child_process");
 
 module.exports = async function windowsSign(fileToSign) {
-	const dlib = process.env.AZURE_TRUSTED_SIGNING_DLIB;
-	const metadata = process.env.AZURE_TRUSTED_SIGNING_METADATA;
-	const signtool = process.env.SIGNTOOL_PATH || "signtool.exe";
-	const timestampUrl = process.env.CODESIGN_TIMESTAMP_URL || "http://timestamp.acs.microsoft.com";
+  const dlib = process.env.AZURE_TRUSTED_SIGNING_DLIB;
+  const metadata = process.env.AZURE_TRUSTED_SIGNING_METADATA;
+  const signtool = process.env.SIGNTOOL_PATH || "signtool.exe";
+  const timestampUrl = process.env.CODESIGN_TIMESTAMP_URL || "http://timestamp.acs.microsoft.com";
 
-	if (!dlib) {
-		throw new Error(`AZURE_TRUSTED_SIGNING_DLIB is not set — cannot sign ${fileToSign}`);
-	}
-	if (!metadata) {
-		throw new Error(`AZURE_TRUSTED_SIGNING_METADATA is not set — cannot sign ${fileToSign}`);
-	}
+  if (!dlib) {
+    throw new Error(`AZURE_TRUSTED_SIGNING_DLIB is not set — cannot sign ${fileToSign}`);
+  }
+  if (!metadata) {
+    throw new Error(`AZURE_TRUSTED_SIGNING_METADATA is not set — cannot sign ${fileToSign}`);
+  }
 
-	execFileSync(
-		signtool,
-		[
-			"sign",
-			"/v",
-			"/fd",
-			"sha256", // file digest algorithm
-			"/tr",
-			timestampUrl, // RFC-3161 timestamp server (survives cert expiry)
-			"/td",
-			"sha256", // timestamp digest algorithm
-			"/dlib",
-			dlib, // Trusted Signing dlib that performs the cloud sign
-			"/dmdf",
-			metadata, // JSON: Endpoint, CodeSigningAccountName, CertificateProfileName
-			"/d",
-			"Beacon", // description shown in the Windows UAC prompt
-			fileToSign,
-		],
-		{ stdio: "inherit" },
-	);
+  execFileSync(
+    signtool,
+    [
+      "sign",
+      "/v",
+      "/fd",
+      "sha256", // file digest algorithm
+      "/tr",
+      timestampUrl, // RFC-3161 timestamp server (survives cert expiry)
+      "/td",
+      "sha256", // timestamp digest algorithm
+      "/dlib",
+      dlib, // Trusted Signing dlib that performs the cloud sign
+      "/dmdf",
+      metadata, // JSON: Endpoint, CodeSigningAccountName, CertificateProfileName
+      "/d",
+      "Beacon", // description shown in the Windows UAC prompt
+      fileToSign,
+    ],
+    { stdio: "inherit" },
+  );
 };

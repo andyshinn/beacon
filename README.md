@@ -1,11 +1,15 @@
 # Beacon
 
-<!-- Add a screenshot here -->
-
-A tiny desktop app for browsing **mDNS / Bonjour / DNS-SD** services on your local
+A desktop app for browsing **mDNS / Bonjour / DNS-SD** services on your local
 network. Watch devices and services appear and disappear in real time.
 
 Built with Electron, React, Radix Themes, and [`bonjour-service`](https://www.npmjs.com/package/bonjour-service).
+
+![Beacon](logo/screenshot.png)
+
+## Vibe Coded
+
+This app is mostly built with the assistance of Claude and other LLM tools. It works for me. But expect rough edges and treat it as a hobby project. Consider this your AI warning.
 
 ## Development
 
@@ -16,12 +20,6 @@ pnpm test       # run the test suite
 pnpm make       # build distributables
 ```
 
-## 🎈 Vibe Coded
-
-Heads up: this app is mostly *vibe coded* — built quickly and iteratively with an AI
-assistant, guided more by feel than by rigor. It works for me, but expect rough
-edges, treat it as a hobby project, and don't rely on it for anything critical.
-
 ## License
 
-MIT © Andy Shinn
+MIT

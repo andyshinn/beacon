@@ -9,24 +9,24 @@ import { defineConfig } from "vite";
 // for the same reason). The package stays runnable because it's listed under
 // package.json "dependencies", so Forge ships it unbundled into the app.
 const external = [
-	"electron",
-	"bonjour-service",
-	"update-electron-app",
-	...builtinModules,
-	...builtinModules.map((m) => `node:${m}`),
+  "electron",
+  "bonjour-service",
+  "update-electron-app",
+  ...builtinModules,
+  ...builtinModules.map((m) => `node:${m}`),
 ];
 
 export default defineConfig({
-	// Defining build.lib ourselves stops @electron-forge/plugin-vite from
-	// injecting its default `formats: ['cjs']` (which emits require() calls that
-	// crash under package.json "type": "module"). Emit ESM instead.
-	build: {
-		lib: {
-			entry: "src/main/main.ts",
-			fileName: () => "[name].js",
-			formats: ["es"],
-		},
-		rollupOptions: { external },
-	},
-	resolve: { conditions: ["node"], mainFields: ["module", "jsnext:main", "jsnext"] },
+  // Defining build.lib ourselves stops @electron-forge/plugin-vite from
+  // injecting its default `formats: ['cjs']` (which emits require() calls that
+  // crash under package.json "type": "module"). Emit ESM instead.
+  build: {
+    lib: {
+      entry: "src/main/main.ts",
+      fileName: () => "[name].js",
+      formats: ["es"],
+    },
+    rollupOptions: { external },
+  },
+  resolve: { conditions: ["node"], mainFields: ["module", "jsnext:main", "jsnext"] },
 });

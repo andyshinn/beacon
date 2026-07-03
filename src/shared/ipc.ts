@@ -1,18 +1,18 @@
 import type { DiscoveryDelta, DiscoveryHealth, DiscoverySnapshot, DiscoveryStatus } from "./types";
 
 export const IPC = {
-	snapshot: "discovery:snapshot",
-	delta: "discovery:delta",
-	status: "discovery:status",
-	health: "discovery:health",
-	rescan: "command:rescan",
-	setLive: "command:setLive",
-	resolve: "command:resolve",
-	getSnapshot: "command:getSnapshot",
-	openExternal: "command:openExternal",
-	openLocalNetworkSettings: "command:openLocalNetworkSettings",
-	menuCommand: "menu:command",
-	menuState: "menu:state",
+  snapshot: "discovery:snapshot",
+  delta: "discovery:delta",
+  status: "discovery:status",
+  health: "discovery:health",
+  rescan: "command:rescan",
+  setLive: "command:setLive",
+  resolve: "command:resolve",
+  getSnapshot: "command:getSnapshot",
+  openExternal: "command:openExternal",
+  openLocalNetworkSettings: "command:openLocalNetworkSettings",
+  menuCommand: "menu:command",
+  menuState: "menu:state",
 } as const;
 
 export type SnapshotPayload = DiscoverySnapshot;
@@ -25,16 +25,16 @@ export type HealthPayload = DiscoveryHealth;
 export type ViewMode = "service" | "host" | "ip" | "all";
 
 export type MenuCommand =
-	| "rescan"
-	| "toggleLive"
-	| `view:${ViewMode}`
-	| "focusSearch"
-	| "export:json"
-	| "export:csv"
-	| "export:txt"
-	| "openLocalNetworkSettings";
+  | "rescan"
+  | "toggleLive"
+  | `view:${ViewMode}`
+  | "focusSearch"
+  | "export:json"
+  | "export:csv"
+  | "export:txt"
+  | "openLocalNetworkSettings";
 
 export interface MenuStatePayload {
-	live: boolean;
-	mode: ViewMode;
+  live: boolean;
+  mode: ViewMode;
 }

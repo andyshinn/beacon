@@ -9,32 +9,32 @@
 // resolve via ESM from INSIDE app.asar (no asar.unpack). If bonjour-service's dependency
 // tree changes, update RUNTIME_DEPS; scripts/smoke-package.sh catches a missing member.
 export const RUNTIME_DEPS = [
-	"bonjour-service",
-	"multicast-dns",
-	"dns-packet",
-	"thunky",
-	"fast-deep-equal",
-	"@leichtgewicht/ip-codec",
-	// update-electron-app auto-update closure. Externalized in vite.main.config.mts
-	// (CJS, requires electron/builtins), so it must ship unbundled like bonjour-service.
-	"update-electron-app",
-	"github-url-to-object",
-	"is-url",
-	"ms",
+  "bonjour-service",
+  "multicast-dns",
+  "dns-packet",
+  "thunky",
+  "fast-deep-equal",
+  "@leichtgewicht/ip-codec",
+  // update-electron-app auto-update closure. Externalized in vite.main.config.mts
+  // (CJS, requires electron/builtins), so it must ship unbundled like bonjour-service.
+  "update-electron-app",
+  "github-url-to-object",
+  "is-url",
+  "ms",
 ] as const;
 
 export function keepInPackage(file: string): boolean {
-	if (!file) return true; // packager probes the root with "" — mirror Forge's keep
-	if (file.startsWith("/.vite")) return true;
-	if (file === "/package.json") return true;
-	if (file === "/node_modules") return true; // keep the dir entry so packager descends
-	for (const dep of RUNTIME_DEPS) {
-		const base = `/node_modules/${dep}`;
-		if (file === base || file.startsWith(`${base}/`)) return true;
-		if (dep.startsWith("@")) {
-			const scope = `/node_modules/${dep.slice(0, dep.indexOf("/"))}`;
-			if (file === scope) return true; // keep the scope dir entry so packager descends
-		}
-	}
-	return false;
+  if (!file) return true; // packager probes the root with "" — mirror Forge's keep
+  if (file.startsWith("/.vite")) return true;
+  if (file === "/package.json") return true;
+  if (file === "/node_modules") return true; // keep the dir entry so packager descends
+  for (const dep of RUNTIME_DEPS) {
+    const base = `/node_modules/${dep}`;
+    if (file === base || file.startsWith(`${base}/`)) return true;
+    if (dep.startsWith("@")) {
+      const scope = `/node_modules/${dep.slice(0, dep.indexOf("/"))}`;
+      if (file === scope) return true; // keep the scope dir entry so packager descends
+    }
+  }
+  return false;
 }

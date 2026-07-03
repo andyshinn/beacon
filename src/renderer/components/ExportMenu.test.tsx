@@ -9,31 +9,31 @@ import { useDiscoveryStore } from "../store/discoveryStore";
 import { ExportMenu } from "./ExportMenu";
 
 beforeEach(() => {
-	useDiscoveryStore.setState({ instances: new Map(), hosts: new Map(), query: "", toast: null });
-	vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText: vi.fn().mockResolvedValue(undefined) } });
+  useDiscoveryStore.setState({ instances: new Map(), hosts: new Map(), query: "", toast: null });
+  vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText: vi.fn().mockResolvedValue(undefined) } });
 });
 
 describe("ExportMenu", () => {
-	it("renders the export trigger button", () => {
-		render(
-			<Theme>
-				<ExportMenu />
-			</Theme>,
-		);
-		expect(screen.getByRole("button", { name: /export/i })).toBeTruthy();
-	});
+  it("renders the export trigger button", () => {
+    render(
+      <Theme>
+        <ExportMenu />
+      </Theme>,
+    );
+    expect(screen.getByRole("button", { name: /export/i })).toBeTruthy();
+  });
 
-	it("copies a snapshot when Copy as text item is clicked", async () => {
-		render(
-			<Theme>
-				<ExportMenu defaultOpen />
-			</Theme>,
-		);
-		const item = await screen.findByText("Copy as text");
-		fireEvent.click(item);
-		// Allow the async exportAs("txt") to settle
-		await vi.waitFor(() => {
-			expect(useDiscoveryStore.getState().toast).toBe("Copied snapshot");
-		});
-	});
+  it("copies a snapshot when Copy as text item is clicked", async () => {
+    render(
+      <Theme>
+        <ExportMenu defaultOpen />
+      </Theme>,
+    );
+    const item = await screen.findByText("Copy as text");
+    fireEvent.click(item);
+    // Allow the async exportAs("txt") to settle
+    await vi.waitFor(() => {
+      expect(useDiscoveryStore.getState().toast).toBe("Copied snapshot");
+    });
+  });
 });

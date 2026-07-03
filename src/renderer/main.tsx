@@ -23,36 +23,36 @@ void window.beacon.getSnapshot().then((snapshot) => store.applySnapshot(snapshot
 // Toast when a rescan finishes (scanning true → false).
 let prevScanning = false;
 useDiscoveryStore.subscribe((s) => {
-	if (prevScanning && !s.status.scanning) s.showToast("Rescan complete");
-	prevScanning = s.status.scanning;
+  if (prevScanning && !s.status.scanning) s.showToast("Rescan complete");
+  prevScanning = s.status.scanning;
 });
 
 function Root() {
-	const appearance = useSettingsStore((s) => s.appearance);
-	useEffect(() => {
-		useDiscoveryStore.getState().tick(Date.now());
-		const clock = setInterval(() => useDiscoveryStore.getState().tick(Date.now()), 1000);
-		const removeKeys = installKeyboard();
-		const removeNav = installNavigation();
-		const removeMenu = installMenu();
-		return () => {
-			clearInterval(clock);
-			removeKeys();
-			removeNav();
-			removeMenu();
-		};
-	}, []);
-	return (
-		<Theme appearance={appearance} accentColor="indigo" grayColor="slate" radius="medium">
-			<App />
-		</Theme>
-	);
+  const appearance = useSettingsStore((s) => s.appearance);
+  useEffect(() => {
+    useDiscoveryStore.getState().tick(Date.now());
+    const clock = setInterval(() => useDiscoveryStore.getState().tick(Date.now()), 1000);
+    const removeKeys = installKeyboard();
+    const removeNav = installNavigation();
+    const removeMenu = installMenu();
+    return () => {
+      clearInterval(clock);
+      removeKeys();
+      removeNav();
+      removeMenu();
+    };
+  }, []);
+  return (
+    <Theme appearance={appearance} accentColor="indigo" grayColor="slate" radius="medium">
+      <App />
+    </Theme>
+  );
 }
 
 const container = document.getElementById("root");
 if (!container) throw new Error("Missing #root element");
 createRoot(container).render(
-	<StrictMode>
-		<Root />
-	</StrictMode>,
+  <StrictMode>
+    <Root />
+  </StrictMode>,
 );

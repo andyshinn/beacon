@@ -5,12 +5,12 @@
  * call, which reads the repository from package.json and polls update.electronjs.org.
  */
 export interface AutoUpdateDeps {
-	/** electron app.isPackaged — false under `electron-forge start` and in tests. */
-	isPackaged: boolean;
-	/** Starts the updater (wraps updateElectronApp()); only invoked when packaged. */
-	start: () => void;
-	/** Optional log sink; defaults to console.log. */
-	log?: (message: string) => void;
+  /** electron app.isPackaged — false under `electron-forge start` and in tests. */
+  isPackaged: boolean;
+  /** Starts the updater (wraps updateElectronApp()); only invoked when packaged. */
+  start: () => void;
+  /** Optional log sink; defaults to console.log. */
+  log?: (message: string) => void;
 }
 
 /**
@@ -18,12 +18,12 @@ export interface AutoUpdateDeps {
  * started, false if skipped (dev/unpackaged). Never throws.
  */
 export function initAutoUpdate(deps: AutoUpdateDeps): boolean {
-	const log = deps.log ?? ((m: string) => console.log(m));
-	if (!deps.isPackaged) {
-		log("[beacon] auto-update skipped (not packaged)");
-		return false;
-	}
-	deps.start();
-	log("[beacon] auto-update started");
-	return true;
+  const log = deps.log ?? ((m: string) => console.log(m));
+  if (!deps.isPackaged) {
+    log("[beacon] auto-update skipped (not packaged)");
+    return false;
+  }
+  deps.start();
+  log("[beacon] auto-update started");
+  return true;
 }

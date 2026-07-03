@@ -7,13 +7,13 @@
    with the appearance toggle. Without it the bespoke surfaces stayed dark while
    Radix flipped --gray-* to light, leaving dark text on dark panels. */
 :root {
-	--app-bg: #111113; /* slate-1 (dark) */
-	--surface-panel: #18191b; /* slate-2 (dark) */
-	--surface-toolbar: #212225; /* slate-3 (dark) */
-	--surface-menu: #18191b; /* slate-2 (dark) */
-	--row-h: 30px;
-	--list-fs: 13px;
-	--row-pad: 10px;
+  --app-bg: #111113; /* slate-1 (dark) */
+  --surface-panel: #18191b; /* slate-2 (dark) */
+  --surface-toolbar: #212225; /* slate-3 (dark) */
+  --surface-menu: #18191b; /* slate-2 (dark) */
+  --row-h: 30px;
+  --list-fs: 13px;
+  --row-pad: 10px;
 }
 
 /* Light appearance: Radix puts `.light` (or `.light-theme`) on the <Theme>
@@ -21,10 +21,10 @@
    slate light scale used by the --gray-* borders for a cohesive look. */
 .light,
 .light-theme {
-	--app-bg: #fcfcfd; /* slate-1 (light) */
-	--surface-panel: #f9f9fb; /* slate-2 (light) */
-	--surface-toolbar: #f0f0f3; /* slate-3 (light) */
-	--surface-menu: #fcfcfd; /* slate-1 (light) */
+  --app-bg: #fcfcfd; /* slate-1 (light) */
+  --surface-panel: #f9f9fb; /* slate-2 (light) */
+  --surface-toolbar: #f0f0f3; /* slate-3 (light) */
+  --surface-menu: #fcfcfd; /* slate-1 (light) */
 }
 
 /* Reset the UA defaults so the app fills the window edge-to-edge. Without this
@@ -33,79 +33,79 @@
    document-level scrollbar. Mirrors the design mockup's html/body reset. */
 html,
 body {
-	margin: 0;
-	padding: 0;
-	height: 100%;
-	overflow: hidden;
-	background: var(--app-bg);
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--app-bg);
 }
 #root {
-	height: 100%;
+  height: 100%;
 }
 
 .bcn-app {
-	display: flex;
-	flex-direction: column;
-	height: 100vh;
-	overflow: hidden;
-	background: var(--app-bg);
-	color: var(--gray-12);
-	font-size: var(--list-fs);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--app-bg);
+  color: var(--gray-12);
+  font-size: var(--list-fs);
 }
 
 .bcn-toolbar {
-	flex: 0 0 auto;
-	height: 46px;
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 0 12px;
-	background: var(--surface-toolbar);
-	border-bottom: 1px solid var(--gray-a6);
-	-webkit-app-region: drag;
+  flex: 0 0 auto;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: var(--surface-toolbar);
+  border-bottom: 1px solid var(--gray-a6);
+  -webkit-app-region: drag;
 }
 .bcn-app[data-platform="mac"] .bcn-toolbar {
-	padding-left: 76px;
+  padding-left: 76px;
 }
 .bcn-toolbar button,
 .bcn-toolbar input,
 .bcn-toolbar a,
 .bcn-toolbar [role="combobox"],
 .bcn-no-drag {
-	-webkit-app-region: no-drag;
+  -webkit-app-region: no-drag;
 }
 
 .bcn-body {
-	flex: 1;
-	display: flex;
-	min-height: 0;
+  flex: 1;
+  display: flex;
+  min-height: 0;
 }
 .bcn-list-pane {
-	flex: 0 0 auto;
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	background: var(--surface-panel);
-	border-right: 1px solid var(--gray-a6);
+  flex: 0 0 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-panel);
+  border-right: 1px solid var(--gray-a6);
 }
 .bcn-detail-pane {
-	flex: 1;
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	background: var(--app-bg);
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--app-bg);
 }
 .bcn-status-bar {
-	flex: 0 0 auto;
-	height: 28px;
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 0 14px;
-	background: var(--surface-toolbar);
-	border-top: 1px solid var(--gray-a6);
-	font-size: 11.5px;
-	color: var(--gray-10);
+  flex: 0 0 auto;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  background: var(--surface-toolbar);
+  border-top: 1px solid var(--gray-a6);
+  font-size: 11.5px;
+  color: var(--gray-10);
 }
 
 /* Dimmable scroll panels (paused tint). The scroll container itself is a
@@ -114,54 +114,54 @@ body {
    carries the paused dimming — the panes dim while discovery is paused to mark
    the list as a frozen snapshot. */
 .bcn-scroll {
-	flex: 1;
-	min-height: 0;
-	transition: opacity 0.8s;
+  flex: 1;
+  min-height: 0;
+  transition: opacity 0.8s;
 }
 .bcn-app[data-paused] .bcn-scroll {
-	opacity: 0.6;
+  opacity: 0.6;
 }
 /* Radix viewport forces `width: fit-content` on its single child to enable
    horizontal scrolling; we only scroll vertically, so let the content fill the
    pane width (keeps right-aligned badges / full-width tables flush). */
 .bcn-scroll-content {
-	width: 100%;
-	box-sizing: border-box;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @keyframes bcn-liveplus {
-	0% {
-		box-shadow: 0 0 0 0 var(--green-a3);
-	}
-	70% {
-		box-shadow: 0 0 0 5px transparent;
-	}
-	100% {
-		box-shadow: 0 0 0 0 transparent;
-	}
+  0% {
+    box-shadow: 0 0 0 0 var(--green-a3);
+  }
+  70% {
+    box-shadow: 0 0 0 5px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 @keyframes bcn-spin {
-	to {
-		transform: rotate(360deg);
-	}
+  to {
+    transform: rotate(360deg);
+  }
 }
 @keyframes bcn-popin {
-	from {
-		opacity: 0;
-		transform: translateX(-50%) translateY(8px) scale(0.96);
-	}
-	to {
-		opacity: 1;
-		transform: translateX(-50%) translateY(0) scale(1);
-	}
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
 }
 @keyframes bcn-menuin {
-	from {
-		opacity: 0;
-		transform: translateY(-4px) scale(0.98);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0) scale(1);
-	}
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

@@ -7,8 +7,8 @@
    Theme root) so both scopes resolve the brand stack. */
 :root,
 .radix-themes {
-	--default-font-family: "Lexend Variable", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", sans-serif;
-	--code-font-family: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-	--heading-font-family: var(--default-font-family);
-	--strong-font-family: var(--default-font-family);
+  --default-font-family: "Lexend Variable", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", sans-serif;
+  --code-font-family: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --heading-font-family: var(--default-font-family);
+  --strong-font-family: var(--default-font-family);
 }

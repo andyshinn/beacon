@@ -1,12 +1,12 @@
 .divider {
-	flex: 0 0 6px;
-	margin: 0 -3px;
-	cursor: col-resize;
-	background: transparent;
-	z-index: 1;
-	transition: background 0.12s;
+  flex: 0 0 6px;
+  margin: 0 -3px;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 1;
+  transition: background 0.12s;
 }
 .divider:hover,
 .divider:active {
-	background: var(--accent-a5);
+  background: var(--accent-a5);
 }
