@@ -34,10 +34,10 @@ The approach mirrors CoreSense's proven setup, adapted to Beacon's simpler shape
 
 ## 3. Signing philosophy: opt-in everywhere
 
-All three signing paths are **opt-in via environment presence**, so a plain `pnpm make` on any machine (contributor, fork, CI without secrets) still produces working unsigned artifacts. Signing activates only when its credentials are present:
+Signing credentials are **opt-in via environment presence**, so a plain `pnpm make` (single host arch) on any machine still produces a working build with no secrets. Developer ID / notarization / Windows signing activate only when their credentials are present:
 
-- **macOS sign** — active when `APPLE_SIGNING_IDENTITY` is set.
-- **macOS notarize** — active when `APPLE_API_KEY` + `APPLE_API_KEY_ID` + `APPLE_API_ISSUER` are all set.
+- **macOS sign** — a real Developer ID sign when `APPLE_SIGNING_IDENTITY` is set; **otherwise ad-hoc** (`identity: "-"`). macOS signing always runs because a *fully-unsigned* universal (x64+arm64) build cannot be stitched by `@electron/universal` on Apple Silicon hosts/runners (the arm64 slice is auto ad-hoc-signed by the packager and the x64 slice is not, so their file trees differ and the merge aborts). Ad-hoc signing needs no certificate, signs both slices symmetrically, and is transparently upgraded to Developer ID when the identity is present.
+- **macOS notarize** — active only when `APPLE_API_KEY` + `APPLE_API_KEY_ID` + `APPLE_API_ISSUER` are all set (an ad-hoc build is never notarized).
 - **Windows sign** — active when `WINDOWS_SIGN` is set (the `setup-windows-signing` action sets it after provisioning tooling).
 
 ## 4. Changes by file
@@ -48,14 +48,12 @@ Add opt-in signing config at the top of the module and wire it into `packagerCon
 
 ```ts
 import { join } from "node:path";
-import { PublisherGithub } from "@electron-forge/publisher-github";
+import { PublisherGitHub } from "@electron-forge/publisher-github"; // NB: capital H in Forge 8
 
-// macOS signing — opt-in. When APPLE_SIGNING_IDENTITY is unset, osxSign is
-// undefined so `pnpm make` still packages unsigned (contributors, forks, CI
-// without secrets). In CI the identity is provided as a secret.
-const osxSign = process.env.APPLE_SIGNING_IDENTITY
-  ? { identity: process.env.APPLE_SIGNING_IDENTITY }
-  : undefined;
+// macOS signing always runs so the universal stitch works on Apple Silicon
+// (a fully-unsigned universal build can't be merged there). Real Developer ID
+// when APPLE_SIGNING_IDENTITY is set (CI); ad-hoc ("-", no cert) otherwise.
+const osxSign = { identity: process.env.APPLE_SIGNING_IDENTITY ?? "-" };
 
 // macOS notarization — opt-in, only when all three App Store Connect API-key
 // vars are present. APPLE_API_KEY is a PATH to the .p8 (the CI action writes it).
@@ -114,7 +112,7 @@ new MakerDMG({ icon: "build/icon.icns" }),
 
 ```ts
 publishers: [
-  new PublisherGithub({ repository: { owner: "andyshinn", name: "beacon" }, draft: true }),
+  new PublisherGitHub({ repository: { owner: "andyshinn", name: "beacon" }, draft: true }),
 ],
 ```
 

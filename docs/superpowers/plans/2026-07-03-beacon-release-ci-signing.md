@@ -36,7 +36,7 @@
 - Create: `.nvmrc`
 
 **Interfaces:**
-- Produces: npm scripts `make:mac`, `make:win`, `publish` (consumed by CI in Task 8); `repository` field (consumed by `update-electron-app` in Task 5 and `PublisherGithub` in Task 3).
+- Produces: npm scripts `make:mac`, `make:win`, `publish` (consumed by CI in Task 8); `repository` field (consumed by `update-electron-app` in Task 5 and `PublisherGitHub` in Task 3).
 
 - [ ] **Step 1: Add repository metadata to `package.json`**
 
@@ -274,9 +274,9 @@ At the top of `forge.config.ts`, add the `node:path` import as the first line an
 ```ts
 import { join } from "node:path";
 ```
-and (with the maker imports):
+and (with the maker imports) — note the exact export casing `PublisherGitHub` (capital H) in Forge 8:
 ```ts
-import { PublisherGithub } from "@electron-forge/publisher-github";
+import { PublisherGitHub } from "@electron-forge/publisher-github";
 ```
 
 - [ ] **Step 2: Add the signing consts**
@@ -285,12 +285,14 @@ Directly below the `macIconCatalog` const added in Task 2, add:
 
 ```ts
 
-// macOS code signing — opt-in. Undefined when APPLE_SIGNING_IDENTITY is unset,
-// so `pnpm make` still packages unsigned (contributors, forks, CI without
-// secrets). In CI the identity is provided as a secret.
-const osxSign = process.env.APPLE_SIGNING_IDENTITY
-	? { identity: process.env.APPLE_SIGNING_IDENTITY }
-	: undefined;
+// macOS code signing always runs so the universal (x64+arm64) stitch works on
+// Apple Silicon hosts/runners — @electron/universal cannot merge a fully-unsigned
+// universal app there (the arm64 slice gets auto ad-hoc-signed, the x64 slice does
+// not, and their file trees then differ). With APPLE_SIGNING_IDENTITY set (CI) this
+// is a real Developer ID sign; otherwise it's ad-hoc ("-"), which needs no
+// certificate and keeps `pnpm make:mac` working for contributors and unsigned/fork
+// CI builds. Notarization stays separately gated on the API-key vars below.
+const osxSign = { identity: process.env.APPLE_SIGNING_IDENTITY ?? "-" };
 
 // macOS notarization — opt-in, only when all three App Store Connect API-key
 // vars are present. APPLE_API_KEY is a PATH to the .p8 (the CI action writes it).
@@ -343,7 +345,7 @@ Then add a `publishers` array immediately after the `makers` array (before `plug
 	publishers: [
 		// Defined for parity + a local `pnpm publish` path; CI drives releases with
 		// softprops/action-gh-release instead.
-		new PublisherGithub({ repository: { owner: "andyshinn", name: "beacon" }, draft: true }),
+		new PublisherGitHub({ repository: { owner: "andyshinn", name: "beacon" }, draft: true }),
 	],
 ```
 
@@ -352,17 +354,18 @@ Then add a `publishers` array immediately after the `makers` array (before `plug
 Run: `pnpm typecheck && pnpm lint`
 Expected: both exit 0. If biome flags the new imports' ordering, run `pnpm lint:fix` then re-run `pnpm lint`.
 
-- [ ] **Step 6: Build an unsigned universal app (proves opt-in gating)**
+- [ ] **Step 6: Build a universal app with no Apple secrets (proves the ad-hoc fallback stitches)**
 
-Run with no Apple env set so signing stays off:
+With `osxSign` defaulting to ad-hoc, a no-secrets universal build must still succeed (this is the path fork PRs and pre-secrets CI take on Apple Silicon `macos-latest`):
 ```bash
-env -u APPLE_SIGNING_IDENTITY -u APPLE_API_KEY pnpm make:mac
+rm -rf out
+env -u APPLE_SIGNING_IDENTITY -u APPLE_API_KEY -u WINDOWS_SIGN pnpm make:mac
 lipo -archs "$(/bin/ls -d out/Beacon-darwin-universal/Beacon.app | head -1)/Contents/MacOS/Beacon"
-ls out/make/**/*.dmg out/make/**/*.zip 2>/dev/null || find out/make -name '*.dmg' -o -name '*.zip'
+find out/make -name '*.dmg' -o -name '*.zip'
 ```
 Expected: `make:mac` completes; `lipo -archs` prints `x86_64 arm64`; a `.dmg` and a `.zip` exist under `out/make/`.
 
-> If `make:mac` fails on the universal stitch or an alpha-Forge config key, this is the flagged Forge-8-alpha / `mergeASARs` risk — debug with superpowers:systematic-debugging before proceeding.
+> **Why ad-hoc:** a *fully-unsigned* universal build cannot be stitched by `@electron/universal` on Apple Silicon (the arm64 slice is auto ad-hoc-signed by the packager, the x64 slice is not, so their file trees differ and the merge aborts). Defaulting `osxSign` to ad-hoc (`identity: "-"`) signs both slices symmetrically with no certificate; a real `APPLE_SIGNING_IDENTITY` transparently upgrades it to Developer ID. Verified locally.
 
 - [ ] **Step 7: Commit**
 
