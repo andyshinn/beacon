@@ -842,6 +842,13 @@ jobs:
     name: Build (${{ matrix.platform }})
     needs: checks
     runs-on: ${{ matrix.os }}
+    # Gate the signing setup steps on secret presence (secrets aren't allowed in a
+    # step `if`, so map them to job env booleans here). Fork PRs and runs before the
+    # secrets are configured then skip signing and still build: macOS falls back to
+    # ad-hoc signing (forge.config.ts) and Windows builds unsigned.
+    env:
+      HAS_APPLE_SIGNING: ${{ secrets.MACOS_CERTIFICATE != '' }}
+      HAS_WINDOWS_SIGNING: ${{ secrets.AZURE_CODE_SIGNING_ENDPOINT != '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -871,7 +878,7 @@ jobs:
 
       # macOS code signing + notarization setup (cert import + notary key).
       - name: Set up macOS signing
-        if: matrix.platform == 'darwin'
+        if: matrix.platform == 'darwin' && env.HAS_APPLE_SIGNING == 'true'
         uses: ./.github/actions/setup-macos-signing
         with:
           certificate: ${{ secrets.MACOS_CERTIFICATE }}
@@ -880,7 +887,7 @@ jobs:
 
       # Windows Azure Trusted Signing setup (dlib + metadata + signtool).
       - name: Set up Windows signing
-        if: matrix.platform == 'win32'
+        if: matrix.platform == 'win32' && env.HAS_WINDOWS_SIGNING == 'true'
         uses: ./.github/actions/setup-windows-signing
         with:
           endpoint: ${{ secrets.AZURE_CODE_SIGNING_ENDPOINT }}
