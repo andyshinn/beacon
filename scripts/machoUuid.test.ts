@@ -71,23 +71,23 @@ const STOCK_ELECTRON_UUID = Buffer.from("4c4c444c55553144a1dcb241098d4b8b", "hex
 
 describe("uuidForBundleId", () => {
   it("returns 16 bytes", () => {
-    expect(uuidForBundleId("com.andyshinn.beacon")).toHaveLength(16);
+    expect(uuidForBundleId("as.andyshinn.beacon")).toHaveLength(16);
   });
 
   it("is deterministic — same bundle id yields the same UUID", () => {
-    expect(uuidForBundleId("com.andyshinn.beacon")).toEqual(uuidForBundleId("com.andyshinn.beacon"));
+    expect(uuidForBundleId("as.andyshinn.beacon")).toEqual(uuidForBundleId("as.andyshinn.beacon"));
   });
 
   it("differs for different bundle ids", () => {
-    expect(uuidForBundleId("com.andyshinn.beacon")).not.toEqual(uuidForBundleId("com.example.other"));
+    expect(uuidForBundleId("as.andyshinn.beacon")).not.toEqual(uuidForBundleId("com.example.other"));
   });
 
   it("never collides with the stock Electron UUID", () => {
-    expect(uuidForBundleId("com.andyshinn.beacon")).not.toEqual(STOCK_ELECTRON_UUID);
+    expect(uuidForBundleId("as.andyshinn.beacon")).not.toEqual(STOCK_ELECTRON_UUID);
   });
 
   it("sets RFC-4122 version (5) and variant bits so it is a well-formed UUID", () => {
-    const u = uuidForBundleId("com.andyshinn.beacon");
+    const u = uuidForBundleId("as.andyshinn.beacon");
     expect(u.readUInt8(6) & 0xf0).toBe(0x50); // version 5 in the high nibble of byte 6
     expect(u.readUInt8(8) & 0xc0).toBe(0x80); // variant 10xx in the top two bits of byte 8
   });
@@ -223,9 +223,9 @@ describe("filesystem helpers", () => {
     // Pre-rename Electron builds still name the main executable "Electron".
     writeThinMacho(macos, Buffer.alloc(16, 0x11), "Electron");
 
-    const result = stampUniqueMachoUuid(app, "com.andyshinn.beacon");
+    const result = stampUniqueMachoUuid(app, "as.andyshinn.beacon");
 
-    const expected = uuidForBundleId("com.andyshinn.beacon");
+    const expected = uuidForBundleId("as.andyshinn.beacon");
     expect(result.slices).toBe(1);
     expect(result.uuid).toBe(formatUuid(expected));
     expect(result.file).toBe(path.join(macos, "Electron"));

@@ -26,7 +26,7 @@ echo "==> Asserting the macOS Local Network Info.plist keys…"
 /usr/libexec/PlistBuddy -c "Print :NSLocalNetworkUsageDescription" "$PLIST" >/dev/null 2>&1 \
 	|| fail "NSLocalNetworkUsageDescription missing from Info.plist"
 BID="$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$PLIST" 2>/dev/null || true)"
-[ "$BID" = "com.andyshinn.beacon" ] || fail "CFBundleIdentifier is '$BID', expected com.andyshinn.beacon"
+[ "$BID" = "as.andyshinn.beacon" ] || fail "CFBundleIdentifier is '$BID', expected as.andyshinn.beacon"
 
 echo "==> Booting a RELOCATED copy (outside the source tree)…"
 TMP="$(mktemp -d)"

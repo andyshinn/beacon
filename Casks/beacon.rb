@@ -24,9 +24,9 @@ cask "beacon" do
 
   zap trash: [
     "~/Library/Application Support/Beacon",
-    "~/Library/Caches/com.andyshinn.beacon",
-    "~/Library/Caches/com.andyshinn.beacon.ShipIt",
-    "~/Library/Preferences/com.andyshinn.beacon.plist",
-    "~/Library/Saved Application State/com.andyshinn.beacon.savedState",
+    "~/Library/Caches/as.andyshinn.beacon",
+    "~/Library/Caches/as.andyshinn.beacon.ShipIt",
+    "~/Library/Preferences/as.andyshinn.beacon.plist",
+    "~/Library/Saved Application State/as.andyshinn.beacon.savedState",
   ]
 end

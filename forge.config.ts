@@ -14,7 +14,7 @@ import { stampUniqueMachoUuid } from "./scripts/machoUuid";
 import { keepInPackage } from "./scripts/packageIgnore";
 
 // Single source of truth for the bundle id — also the seed for the per-app Mach-O UUID below.
-const APP_BUNDLE_ID = "com.andyshinn.beacon";
+const APP_BUNDLE_ID = "as.andyshinn.beacon";
 
 // Ship the compiled Liquid Glass asset catalog only on macOS (dead weight in
 // Windows/Linux bundles). Generated from logo/beacon.icon by `pnpm icons`.
