@@ -11,8 +11,8 @@ import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { parseArgs } from "node:util";
 import { fileURLToPath } from "node:url";
+import { parseArgs } from "node:util";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_CASK = join(REPO_ROOT, "Casks", "beacon.rb");
@@ -25,7 +25,10 @@ function fail(message) {
 async function sha256(path) {
   const hash = createHash("sha256");
   await new Promise((res, rej) => {
-    createReadStream(path).on("error", rej).on("data", (chunk) => hash.update(chunk)).on("end", res);
+    createReadStream(path)
+      .on("error", rej)
+      .on("data", (chunk) => hash.update(chunk))
+      .on("end", res);
   });
   return hash.digest("hex");
 }
