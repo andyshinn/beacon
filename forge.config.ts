@@ -10,7 +10,11 @@ import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { PublisherGitHub } from "@electron-forge/publisher-github";
 import type { ForgeConfig } from "@electron-forge/shared-types";
+import { stampUniqueMachoUuid } from "./scripts/machoUuid";
 import { keepInPackage } from "./scripts/packageIgnore";
+
+// Single source of truth for the bundle id — also the seed for the per-app Mach-O UUID below.
+const APP_BUNDLE_ID = "com.andyshinn.beacon";
 
 // Ship the compiled Liquid Glass asset catalog only on macOS (dead weight in
 // Windows/Linux bundles). Generated from logo/beacon.icon by `pnpm icons`.
@@ -39,7 +43,7 @@ const config: ForgeConfig = {
     // electron-packager appends the per-platform extension: build/icon.icns (mac),
     // build/icon.ico (win). Generated from the brand master via `pnpm icons`.
     icon: "build/icon",
-    appBundleId: "com.andyshinn.beacon",
+    appBundleId: APP_BUNDLE_ID,
     // build/Assets.car -> Contents/Resources/Assets.car (macOS 26 Liquid Glass).
     extraResource: [...macIconCatalog],
     extendInfo: {
@@ -62,6 +66,20 @@ const config: ForgeConfig = {
     // Override the Vite plugin's strip-everything ignore so the externalized bonjour-service
     // closure ships (see scripts/packageIgnore.ts). The plugin respects a user-set function ignore.
     ignore: (file: string) => !keepInPackage(file),
+  },
+  hooks: {
+    // macOS Local Network Privacy keys the permission grant on the main executable's Mach-O
+    // LC_UUID, which is byte-identical across every app on a given Electron version (Beacon's
+    // collided with "com.github.Electron", so macOS never gave Beacon its own Local Network
+    // entry/prompt). Stamp a unique, bundle-id-derived UUID onto each per-arch slice here:
+    // packageAfterCopy runs once per arch, BEFORE @electron/universal stitches the slices and
+    // BEFORE osx-sign, so the single sign+notarize pass covers the patched bytes. See
+    // scripts/machoUuid.ts and docs/superpowers/specs for the full rationale.
+    packageAfterCopy: async (_forgeConfig, buildPath, _electronVersion, platform, arch) => {
+      if (platform !== "darwin") return;
+      const { uuid, slices, file } = stampUniqueMachoUuid(buildPath, APP_BUNDLE_ID);
+      console.log(`[beacon] macOS Local Network UUID stamped: ${uuid} (${arch}, ${slices} slice) → ${file}`);
+    },
   },
   rebuildConfig: {},
   makers: [

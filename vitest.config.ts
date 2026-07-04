@@ -7,7 +7,12 @@ export default defineConfig({
         test: {
           name: "node",
           environment: "node",
-          include: ["src/main/**/*.test.{ts,tsx}", "src/shared/**/*.test.{ts,tsx}", "tests/**/*.test.{ts,tsx}"],
+          include: [
+            "src/main/**/*.test.{ts,tsx}",
+            "src/shared/**/*.test.{ts,tsx}",
+            "tests/**/*.test.{ts,tsx}",
+            "scripts/**/*.test.{ts,tsx}",
+          ],
         },
       },
       {
