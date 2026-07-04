@@ -20,6 +20,17 @@ and Linux artifacts, then drafts a GitHub Release with generated notes.
 Prerelease tags contain a hyphen (e.g. `v0.2.0-beta.1`); these publish immediately
 as prereleases and are **not** served to stable auto-update clients.
 
+## Homebrew cask
+
+Publishing a **stable** release triggers [`.github/workflows/homebrew-cask.yml`](.github/workflows/homebrew-cask.yml),
+which downloads the universal `.dmg`, recomputes `Casks/beacon.rb` (`version` +
+`sha256`) via [`scripts/update-cask.mjs`](scripts/update-cask.mjs), and commits the
+bump to `main`. Prereleases and drafts are skipped. To bump by hand:
+
+```bash
+node scripts/update-cask.mjs --version 0.2.0 --dmg path/to/Beacon-0.2.0-universal.dmg
+```
+
 ## Signing is opt-in
 
 Local `pnpm make` builds unsigned. Signing activates only when the relevant

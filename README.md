@@ -11,6 +11,22 @@ Built with Electron, React, Radix Themes, and [`bonjour-service`](https://www.np
 
 This app is mostly built with the assistance of Claude and other LLM tools. It works for me. But expect rough edges and treat it as a hobby project. Consider this your AI warning.
 
+## Install
+
+**macOS (Homebrew):**
+
+```sh
+brew tap andyshinn/beacon https://github.com/andyshinn/beacon
+brew install --cask beacon
+```
+
+Later, `brew upgrade --cask beacon`. (The explicit repo URL is needed because the
+cask lives in this repo rather than a separate `homebrew-beacon` tap.)
+
+**Other platforms:** grab the installer for your OS from the
+[latest release](https://github.com/andyshinn/beacon/releases/latest) — `.dmg`
+(macOS), `Setup.exe` (Windows), or `.deb` / `.rpm` (Linux).
+
 ## Development
 
 ```sh
