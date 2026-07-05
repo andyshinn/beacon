@@ -4,8 +4,8 @@
 #   brew tap andyshinn/beacon https://github.com/andyshinn/beacon
 #   brew install --cask beacon
 cask "beacon" do
-  version "0.1.0"
-  sha256 "a76348b4d8b3c552948e88c3a63b0c026c796063a80133ba68dcaf80b8a6f5b2"
+  version "0.1.1"
+  sha256 "7d931266e7bd1353d14b324562e559c1a4be15fcb907790e9558ed8feadeb895"
 
   url "https://github.com/andyshinn/beacon/releases/download/v#{version}/Beacon-#{version}-universal.dmg"
   name "Beacon"
