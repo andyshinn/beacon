@@ -2,7 +2,7 @@ import type { AddrFamily, Host, Instance } from "../../shared/types";
 import type { Selection } from "../store/discoveryStore";
 import { addrAllowed, cmpIp, primaryIp, relativeLastSeen } from "./presence";
 import { visibleInstances } from "./selectors";
-import { HOST_WEB_TYPES, INSTANCE_WEB_TYPES, serviceMeta, webUrl } from "./serviceTypes";
+import { HOST_WEB_TYPES, INSTANCE_WEB_TYPES, serviceMeta, webHost, webUrl } from "./serviceTypes";
 
 export type DetailIconKind = "instance" | "host" | "service" | "ip";
 export interface DetailAction {
@@ -145,7 +145,7 @@ function instanceDetail(id: string, ctx: DetailCtx): DetailModel | null {
   const ip = primaryIp(h);
   const actions: DetailAction[] = [];
   if (INSTANCE_WEB_TYPES.has(it.serviceType)) {
-    const url = webUrl(it.serviceType, ip, it.port);
+    const url = webUrl(it.serviceType, webHost(h?.hostname, ip), it.port);
     if (url) actions.push({ id: "open", label: "Open in Browser", icon: "ext", primary: true, kind: "open", value: url });
   }
   actions.push({
@@ -197,7 +197,7 @@ function hostDetail(id: string, ctx: DetailCtx): DetailModel | null {
   const actions: DetailAction[] = [];
   const webInst = insts.find((i) => HOST_WEB_TYPES.has(i.serviceType));
   if (webInst) {
-    const url = webUrl(webInst.serviceType, ip, webInst.port);
+    const url = webUrl(webInst.serviceType, webHost(h.hostname, ip), webInst.port);
     if (url) actions.push({ id: "open", label: "Open in Browser", icon: "ext", primary: true, kind: "open", value: url });
   }
   actions.push({ id: "copy-host", label: "Copy Hostname", icon: "copy", primary: false, kind: "copy", value: h.hostname });
@@ -274,7 +274,7 @@ function ipDetail(id: string, ctx: DetailCtx): DetailModel | null {
   const actions: DetailAction[] = [];
   const webInst = insts.find((i) => HOST_WEB_TYPES.has(i.serviceType));
   if (webInst) {
-    const url = webUrl(webInst.serviceType, ip, webInst.port);
+    const url = webUrl(webInst.serviceType, webHost(null, ip), webInst.port);
     if (url)
       actions.push({
         id: "open",

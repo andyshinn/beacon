@@ -34,7 +34,24 @@ export function webScheme(type: string): "http" | "https" {
   return type === "_hue._tcp" ? "https" : "http";
 }
 
-export function webUrl(type: string, ip: string | null, port: number): string | null {
+// A plain DNS hostname: dot-separated labels of letters, digits, hyphens (and
+// underscores, leniently), no leading/trailing hyphen. Anything else (e.g. "@",
+// "/", "#", ":", whitespace) could rewrite the URL's authority or path.
+const PLAIN_HOSTNAME = /^[a-z0-9_]([a-z0-9_-]*[a-z0-9_])?(\.[a-z0-9_]([a-z0-9_-]*[a-z0-9_])?)*$/i;
+
+// Host part for a web URL: prefer the mDNS hostname (devices often scope cookies
+// to the name they're reached by), falling back to the IP. The FQDN's trailing
+// dot is stripped so cookies/TLS names match what the device expects. The
+// hostname is the raw SRV target from the network, so it is only used when it
+// is a plain hostname; otherwise the IP is used.
+export function webHost(hostname: string | null | undefined, ip: string | null): string | null {
+  const name = hostname?.replace(/\.$/, "");
+  if (name && PLAIN_HOSTNAME.test(name)) return name;
   if (!ip) return null;
-  return `${webScheme(type)}://${ip}${port > 0 ? `:${port}` : ""}`;
+  return ip.includes(":") ? `[${ip}]` : ip;
+}
+
+export function webUrl(type: string, host: string | null, port: number): string | null {
+  if (!host) return null;
+  return `${webScheme(type)}://${host}${port > 0 ? `:${port}` : ""}`;
 }
