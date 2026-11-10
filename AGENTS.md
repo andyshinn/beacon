@@ -84,8 +84,10 @@ docs/           Design mockups and historical specs/plans (reference only)
 - **Signing is opt-in via env vars** (see `RELEASING.md`). Local and fork builds
   must keep working unsigned; never make a build step require a secret.
 - **Theme tokens:** `html`/`body` sit outside the Radix `<Theme>` root, so
-  `styles/tokens.css` pins literal colors with a `.light` override. Add new bespoke
-  surface colors in both places.
+  `styles/tokens.css` pins literal colors: dark on `:root`, light under
+  `prefers-color-scheme: light`, and again on the Radix `.dark`/`.light` roots.
+  Add new bespoke surface colors to all four blocks. The window background in
+  `src/main/appearance.ts` (`WINDOW_BACKGROUND`) must match `--app-bg`.
 
 ## Code style
 
