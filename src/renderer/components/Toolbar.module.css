@@ -15,8 +15,11 @@
 }
 .leading::before {
   content: "";
-  /* the group's gap follows this item, so take it back out of the inset */
-  flex: 0 0 calc(var(--toolbar-leading-inset) - 8px);
+  flex: 0 0 var(--toolbar-leading-inset);
+  /* the group's gap follows this item even when it is zero-width (no inset off
+     macOS), so cancel it with a negative margin; subtracting it from the
+     flex-basis instead would clamp at 0 and leave a stray 8px gap */
+  margin-right: -8px;
 }
 .trailing {
   justify-content: flex-end;
