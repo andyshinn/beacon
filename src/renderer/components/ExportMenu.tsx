@@ -26,7 +26,7 @@ export function ExportMenu({ defaultOpen }: { defaultOpen?: boolean } = {}) {
                 fontFamily: "var(--code-font-family)",
                 fontSize: 10,
                 fontWeight: 700,
-                color: "var(--gray-10)",
+                color: "var(--gray-11)",
                 width: 30,
               }}
             >

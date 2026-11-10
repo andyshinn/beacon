@@ -26,7 +26,8 @@
   border: none;
   border-radius: 7px;
   background: var(--amber-a3);
-  color: var(--amber-9);
+  /* Step 12, not 11: amber-11 on this tinted fill measures 3.8:1 in light mode. */
+  color: var(--amber-12);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -44,7 +45,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--gray-10);
+  color: var(--gray-11);
   font-size: 16px;
   line-height: 1;
   cursor: pointer;

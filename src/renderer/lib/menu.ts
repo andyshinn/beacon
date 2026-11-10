@@ -65,6 +65,9 @@ export function installMenu(bridge: MenuBridge = window.beacon, handlers: MenuHa
 
   let lastSent = "";
   const push = (): void => {
+    // Main's menu assumes live until told otherwise; the pre-connect placeholder
+    // status would briefly flip it to "Resume Discovery".
+    if (!useDiscoveryStore.getState().connected) return;
     const live = useDiscoveryStore.getState().status.live;
     const mode = useSettingsStore.getState().mode;
     const key = `${live}:${mode}`;

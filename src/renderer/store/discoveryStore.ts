@@ -11,6 +11,8 @@ interface DiscoveryState {
   hosts: Map<string, Host>;
   instances: Map<string, Instance>;
   status: DiscoveryStatus;
+  /** False until main's first status arrives; `status` is a placeholder until then. */
+  connected: boolean;
   selection: Selection | null;
   query: string;
   expanded: Set<string>;
@@ -37,12 +39,23 @@ interface DiscoveryState {
   dismissPermissionHint: () => void;
 }
 
+export type DiscoveryPhase = "connecting" | "live" | "paused";
+
+// The store boots before main has said anything, so `status.live: false` alone
+// can't tell "paused" from "not heard yet". Rendering that gap as Paused made the
+// UI flash Paused (and the panes fade in) on every launch.
+export function discoveryPhase(s: Pick<DiscoveryState, "status" | "connected">): DiscoveryPhase {
+  if (!s.connected) return "connecting";
+  return s.status.live ? "live" : "paused";
+}
+
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
 
 export const useDiscoveryStore = create<DiscoveryState>((set) => ({
   hosts: new Map(),
   instances: new Map(),
   status: { live: false, scanning: false },
+  connected: false,
   selection: null,
   query: "",
   expanded: new Set(),
@@ -67,7 +80,7 @@ export const useDiscoveryStore = create<DiscoveryState>((set) => ({
       return { hosts, instances };
     }),
 
-  applyStatus: (status) => set({ status }),
+  applyStatus: (status) => set({ status, connected: true }),
 
   tick: (now) => set({ now }),
 

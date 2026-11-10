@@ -30,3 +30,10 @@
   font-size: 12px;
   font-weight: 600;
 }
+.toggle:disabled {
+  color: var(--gray-11);
+  cursor: default;
+}
+.toggle:disabled:hover {
+  background: var(--gray-a3);
+}

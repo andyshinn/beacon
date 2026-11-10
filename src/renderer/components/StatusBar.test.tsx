@@ -36,6 +36,7 @@ beforeEach(() => {
     query: "",
     now: 0,
     status: { live: true, scanning: false },
+    connected: true,
   });
 });
 
@@ -46,8 +47,15 @@ describe("StatusBar", () => {
     expect(screen.getByText("1 hosts · 1 service types · 1 instances · 1 addresses")).toBeTruthy();
     expect(screen.getByText("Updated just now")).toBeTruthy();
   });
+  it("shows Connecting… rather than Paused before main reports a status", () => {
+    useDiscoveryStore.setState({ status: { live: false, scanning: false }, connected: false });
+    render(<StatusBar />);
+    expect(screen.getByText("Connecting…")).toBeTruthy();
+    expect(screen.queryByText("Paused")).toBeNull();
+    expect(screen.queryByText("Snapshot paused")).toBeNull();
+  });
   it("shows Paused with no elapsed timer when not live", () => {
-    useDiscoveryStore.setState({ status: { live: false, scanning: false } });
+    useDiscoveryStore.setState({ status: { live: false, scanning: false }, connected: true });
     render(<StatusBar />);
     expect(screen.getByText("Paused")).toBeTruthy();
     expect(screen.getByText("Snapshot paused")).toBeTruthy();

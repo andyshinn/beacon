@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { lensCounts, visibleInstances } from "../lib/selectors";
-import { useDiscoveryStore } from "../store/discoveryStore";
+import { discoveryPhase, useDiscoveryStore } from "../store/discoveryStore";
 import { useSettingsStore } from "../store/settingsStore";
 import styles from "./StatusBar.module.css";
 
@@ -8,7 +8,7 @@ export function StatusBar() {
   const hosts = useDiscoveryStore((s) => s.hosts);
   const instances = useDiscoveryStore((s) => s.instances);
   const query = useDiscoveryStore((s) => s.query);
-  const status = useDiscoveryStore((s) => s.status);
+  const phase = useDiscoveryStore(discoveryPhase);
   const now = useDiscoveryStore((s) => s.now);
   const showV6 = useSettingsStore((s) => s.showV6);
   const showLinkLocal = useSettingsStore((s) => s.showLinkLocal);
@@ -25,9 +25,9 @@ export function StatusBar() {
     });
   }, [instances, hosts, query, showV6, showLinkLocal, now]);
 
-  const dotClass = status.live ? styles.dotLive : styles.dotPaused;
-  const label = status.live ? "Live" : "Paused";
-  const updated = status.live ? "Updated just now" : "Snapshot paused";
+  const dotClass = phase === "live" ? styles.dotLive : styles.dotPaused;
+  const label = { connecting: "Connecting…", live: "Live", paused: "Paused" }[phase];
+  const updated = { connecting: "", live: "Updated just now", paused: "Snapshot paused" }[phase];
 
   return (
     <>

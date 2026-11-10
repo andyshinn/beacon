@@ -7,11 +7,11 @@ import "@fontsource-variable/jetbrains-mono/index.css";
 import "./styles/fonts.css";
 import "./styles/tokens.css";
 import { App } from "./App";
+import { installAppearanceSync, useResolvedAppearance } from "./lib/appearance";
 import { installKeyboard } from "./lib/keyboard";
 import { installMenu } from "./lib/menu";
 import { installNavigation } from "./lib/navigation";
 import { useDiscoveryStore } from "./store/discoveryStore";
-import { useSettingsStore } from "./store/settingsStore";
 
 const store = useDiscoveryStore.getState();
 window.beacon.onSnapshot((snapshot) => store.applySnapshot(snapshot));
@@ -28,18 +28,20 @@ useDiscoveryStore.subscribe((s) => {
 });
 
 function Root() {
-  const appearance = useSettingsStore((s) => s.appearance);
+  const appearance = useResolvedAppearance();
   useEffect(() => {
     useDiscoveryStore.getState().tick(Date.now());
     const clock = setInterval(() => useDiscoveryStore.getState().tick(Date.now()), 1000);
     const removeKeys = installKeyboard();
     const removeNav = installNavigation();
     const removeMenu = installMenu();
+    const removeAppearance = installAppearanceSync();
     return () => {
       clearInterval(clock);
       removeKeys();
       removeNav();
       removeMenu();
+      removeAppearance();
     };
   }, []);
   return (

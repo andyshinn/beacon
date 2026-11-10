@@ -1,8 +1,9 @@
 import { IconButton, SegmentedControl, Tooltip } from "@radix-ui/themes";
 import { rescan } from "../lib/commands";
-import { Refresh, Sun } from "../lib/icons";
+import { Refresh } from "../lib/icons";
 import { useDiscoveryStore } from "../store/discoveryStore";
 import { type Lens, useSettingsStore } from "../store/settingsStore";
+import { AppearanceMenu } from "./AppearanceMenu";
 import { BeaconLockup } from "./brand/BrandLockup";
 import { ExportMenu } from "./ExportMenu";
 import { LiveToggle } from "./LiveToggle";
@@ -20,7 +21,6 @@ const SEGMENTS: { value: Lens; label: string }[] = [
 export function Toolbar() {
   const mode = useSettingsStore((s) => s.mode);
   const setMode = useSettingsStore((s) => s.setMode);
-  const toggleAppearance = useSettingsStore((s) => s.toggleAppearance);
   const scanning = useDiscoveryStore((s) => s.status.scanning);
   return (
     <>
@@ -49,11 +49,7 @@ export function Toolbar() {
         </IconButton>
       </Tooltip>
       <ViewMenu />
-      <Tooltip content="Toggle appearance">
-        <IconButton variant="ghost" size="2" aria-label="Toggle appearance" onClick={() => toggleAppearance()}>
-          <Sun />
-        </IconButton>
-      </Tooltip>
+      <AppearanceMenu />
       <ExportMenu />
     </>
   );

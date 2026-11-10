@@ -5,15 +5,15 @@ import { PermissionBanner } from "./components/PermissionBanner";
 import { StatusBar } from "./components/StatusBar";
 import { Toast } from "./components/Toast";
 import { Toolbar } from "./components/Toolbar";
-import { useDiscoveryStore } from "./store/discoveryStore";
+import { discoveryPhase, useDiscoveryStore } from "./store/discoveryStore";
 import { useSettingsStore } from "./store/settingsStore";
 
 export function App() {
   const isMac = typeof navigator !== "undefined" && navigator.platform.startsWith("Mac");
-  const status = useDiscoveryStore((s) => s.status);
+  const paused = useDiscoveryStore((s) => discoveryPhase(s) === "paused");
   const listPaneWidth = useSettingsStore((s) => s.listPaneWidth);
   return (
-    <div className="bcn-app" data-paused={status.live ? undefined : true} data-platform={isMac ? "mac" : undefined}>
+    <div className="bcn-app" data-paused={paused ? true : undefined} data-platform={isMac ? "mac" : undefined}>
       <header className="bcn-toolbar">
         <Toolbar />
       </header>
