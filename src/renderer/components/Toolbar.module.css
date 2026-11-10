@@ -1,5 +1,28 @@
-.spacer {
-  flex: 1;
+/* The two control groups share the leftover width equally (flex-basis 0), which
+   keeps the brand lockup between them centered on the window. The macOS traffic-
+   light inset lives inside the leading group rather than on the toolbar, so it
+   counts toward that group's half instead of pushing the center rightwards. It
+   is a flex item, not padding: padding is added on top of the zero flex-basis
+   and would make the leading half wider than the trailing one.
+   When the window is too narrow for equal halves the groups fall back to their
+   content width and the lockup drifts off-center instead of overlapping. */
+.leading,
+.trailing {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.leading::before {
+  content: "";
+  flex: 0 0 var(--toolbar-leading-inset);
+  /* the group's gap follows this item even when it is zero-width (no inset off
+     macOS), so cancel it with a negative margin; subtracting it from the
+     flex-basis instead would clamp at 0 and leave a stray 8px gap */
+  margin-right: -8px;
+}
+.trailing {
+  justify-content: flex-end;
 }
 /* Always inline-flex so the wrapped SVG centers inside the IconButton exactly
    like the unwrapped icons (ViewMenu, appearance). Without this the idle (non-

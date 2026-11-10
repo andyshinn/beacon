@@ -75,6 +75,7 @@ body {
 }
 
 .bcn-toolbar {
+  --toolbar-leading-inset: 0px;
   flex: 0 0 auto;
   height: 46px;
   display: flex;
@@ -85,8 +86,13 @@ body {
   border-bottom: 1px solid var(--gray-a6);
   -webkit-app-region: drag;
 }
+/* Clears the traffic lights (trafficLightPosition in src/main/main.ts) with a
+   Safari-like gap before the first control: the lights end at ~72px (~80px on
+   macOS 26, whose lights are larger), and with the toolbar's 12px padding and
+   the Live toggle's own 4px margin the first control starts at 98px. Consumed
+   by the Toolbar's leading group. */
 .bcn-app[data-platform="mac"] .bcn-toolbar {
-  padding-left: 76px;
+  --toolbar-leading-inset: 82px;
 }
 .bcn-toolbar button,
 .bcn-toolbar input,

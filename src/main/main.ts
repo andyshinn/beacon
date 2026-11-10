@@ -71,9 +71,10 @@ function createWindow(): void {
     backgroundColor: windowBackground(nativeTheme),
     titleBarStyle: isMac ? "hiddenInset" : "default",
     // hiddenInset positions the traffic lights for a standard ~28px title bar;
-    // nudge them down/right to sit centered in our taller 46px toolbar
-    // (.bcn-toolbar height) and align with the design mockup.
-    trafficLightPosition: isMac ? { x: 13, y: 16 } : undefined,
+    // nudge them down to sit centered in our taller 46px toolbar (.bcn-toolbar
+    // height) and inset them from the window edge the way Safari's unified
+    // toolbar does. Keep --toolbar-leading-inset (tokens.css) in step with x.
+    trafficLightPosition: isMac ? { x: 20, y: 16 } : undefined,
     webPreferences: {
       preload: path.join(dirname, "preload.cjs"),
       contextIsolation: true,
