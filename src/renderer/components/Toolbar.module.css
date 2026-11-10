@@ -24,6 +24,13 @@
 .trailing {
   justify-content: flex-end;
 }
+/* Mirror of the leading spacer, for the same reason: the trailing inset has to
+   count toward this group's half or the lockup shifts off-center. */
+.trailing::after {
+  content: "";
+  flex: 0 0 var(--toolbar-trailing-inset);
+  margin-left: -8px;
+}
 /* Always inline-flex so the wrapped SVG centers inside the IconButton exactly
    like the unwrapped icons (ViewMenu, appearance). Without this the idle (non-
    spinning) span is a plain inline box and the icon drops to the text baseline,
