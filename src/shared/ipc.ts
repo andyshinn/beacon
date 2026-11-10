@@ -11,6 +11,7 @@ export const IPC = {
   getSnapshot: "command:getSnapshot",
   openExternal: "command:openExternal",
   openLocalNetworkSettings: "command:openLocalNetworkSettings",
+  setAppearance: "command:setAppearance",
   menuCommand: "menu:command",
   menuState: "menu:state",
 } as const;
@@ -38,3 +39,8 @@ export interface MenuStatePayload {
   live: boolean;
   mode: ViewMode;
 }
+
+// "system" follows the OS theme. Shared so main can validate the value and mirror
+// it onto nativeTheme without importing the renderer's settingsStore.
+export const APPEARANCES = ["system", "light", "dark"] as const;
+export type Appearance = (typeof APPEARANCES)[number];

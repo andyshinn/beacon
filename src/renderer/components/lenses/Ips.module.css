@@ -33,7 +33,7 @@
 }
 .groupCount {
   font-size: 10.5px;
-  color: var(--gray-10);
+  color: var(--gray-11);
   font-variant-numeric: tabular-nums;
 }
 .row {
@@ -71,7 +71,7 @@
 }
 .host {
   font-size: 11px;
-  color: var(--gray-10);
+  color: var(--gray-11);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

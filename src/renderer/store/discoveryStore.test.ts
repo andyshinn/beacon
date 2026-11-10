@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DiscoverySnapshot, Host, Instance } from "../../shared/types";
-import { useDiscoveryStore } from "./discoveryStore";
+import { discoveryPhase, useDiscoveryStore } from "./discoveryStore";
 
 function host(id: string): Host {
   return {
@@ -63,6 +63,17 @@ describe("applyStatus", () => {
     expect(useDiscoveryStore.getState().status.live).toBe(false);
     s.applyStatus({ live: true, scanning: false });
     expect(useDiscoveryStore.getState().status.live).toBe(true);
+  });
+});
+
+describe("discoveryPhase", () => {
+  it("is connecting until the first status arrives, then tracks live/paused", () => {
+    useDiscoveryStore.setState({ status: { live: false, scanning: false }, connected: false });
+    expect(discoveryPhase(useDiscoveryStore.getState())).toBe("connecting");
+    useDiscoveryStore.getState().applyStatus({ live: true, scanning: false });
+    expect(discoveryPhase(useDiscoveryStore.getState())).toBe("live");
+    useDiscoveryStore.getState().applyStatus({ live: false, scanning: false });
+    expect(discoveryPhase(useDiscoveryStore.getState())).toBe("paused");
   });
 });
 

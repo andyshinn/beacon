@@ -30,6 +30,7 @@ const beacon: BeaconApi = {
   getSnapshot: () => ipcRenderer.invoke(IPC.getSnapshot) as Promise<SnapshotPayload>,
   openExternal: (url) => ipcRenderer.invoke(IPC.openExternal, url) as Promise<void>,
   openLocalNetworkSettings: () => ipcRenderer.invoke(IPC.openLocalNetworkSettings) as Promise<void>,
+  setAppearance: (appearance) => ipcRenderer.send(IPC.setAppearance, appearance),
   onMenuCommand: (l) => subscribe<MenuCommand>(IPC.menuCommand, l),
   sendMenuState: (state: MenuStatePayload) => ipcRenderer.send(IPC.menuState, state),
 };

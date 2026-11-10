@@ -15,7 +15,7 @@
 }
 .count {
   font-size: 11px;
-  color: var(--gray-10);
+  color: var(--gray-11);
   font-variant-numeric: tabular-nums;
 }
 .spacer {

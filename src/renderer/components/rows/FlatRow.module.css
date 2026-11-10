@@ -39,7 +39,7 @@
 .type {
   font-family: var(--code-font-family);
   font-size: 11px;
-  color: var(--gray-10);
+  color: var(--gray-11);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -62,6 +62,6 @@
 .port {
   font-family: var(--code-font-family);
   font-size: 10.5px;
-  color: var(--gray-10);
+  color: var(--gray-11);
   margin-right: 8px;
 }

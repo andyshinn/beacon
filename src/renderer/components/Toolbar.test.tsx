@@ -1,5 +1,5 @@
 import { Theme } from "@radix-ui/themes";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useDiscoveryStore } from "../store/discoveryStore";
 import { useSettingsStore } from "../store/settingsStore";
@@ -25,7 +25,7 @@ beforeEach(() => {
     onStatus: vi.fn(),
   } as unknown as typeof window.beacon;
   useSettingsStore.setState({ mode: "service", appearance: "dark" });
-  useDiscoveryStore.setState({ query: "", status: { live: true, scanning: false } });
+  useDiscoveryStore.setState({ query: "", status: { live: true, scanning: false }, connected: true });
 });
 
 describe("Toolbar", () => {
@@ -50,8 +50,18 @@ describe("Toolbar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Rescan network" }));
     expect(window.beacon.rescan).toHaveBeenCalled();
   });
+  it("labels the appearance button with the current theme", () => {
+    renderToolbar();
+    const dark = screen.getByRole("button", { name: "Appearance: Dark" });
+    expect(dark.getAttribute("data-appearance")).toBe("dark");
+    cleanup();
+    useSettingsStore.setState({ appearance: "light" });
+    renderToolbar();
+    const light = screen.getByRole("button", { name: "Appearance: Light" });
+    expect(light.getAttribute("data-appearance")).toBe("light");
+  });
   it("clears the query when the clear button is clicked", () => {
-    useDiscoveryStore.setState({ query: "hue", status: { live: true, scanning: false } });
+    useDiscoveryStore.setState({ query: "hue", status: { live: true, scanning: false }, connected: true });
     renderToolbar();
     const clear = screen.getByRole("button", { name: "Clear search" });
     // Must stay out of the title-bar drag region, or the OS swallows the click as a window drag.

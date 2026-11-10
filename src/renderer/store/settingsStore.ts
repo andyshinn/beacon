@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { Appearance } from "../../shared/ipc";
 import { clampPaneWidth, PANE_DEFAULT } from "../lib/paneWidth";
 
 export type Lens = "service" | "host" | "ip" | "all";
 export type SortBy = "name" | "ip" | "lastseen";
-export type Appearance = "dark" | "light";
+export type { Appearance };
 
 interface SettingsState {
   appearance: Appearance;
@@ -15,7 +16,6 @@ interface SettingsState {
   showLinkLocal: boolean;
   listPaneWidth: number;
   setAppearance: (a: Appearance) => void;
-  toggleAppearance: () => void;
   setMode: (m: Lens) => void;
   setSortBy: (s: SortBy) => void;
   toggleShowDesc: () => void;
@@ -27,7 +27,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      appearance: "dark",
+      appearance: "system",
       mode: "service",
       sortBy: "name",
       showDesc: true,
@@ -35,7 +35,6 @@ export const useSettingsStore = create<SettingsState>()(
       showLinkLocal: true,
       listPaneWidth: PANE_DEFAULT,
       setAppearance: (appearance) => set({ appearance }),
-      toggleAppearance: () => set((s) => ({ appearance: s.appearance === "dark" ? "light" : "dark" })),
       setMode: (mode) => set({ mode }),
       setSortBy: (sortBy) => set({ sortBy }),
       toggleShowDesc: () => set((s) => ({ showDesc: !s.showDesc })),
@@ -43,6 +42,13 @@ export const useSettingsStore = create<SettingsState>()(
       toggleShowLinkLocal: () => set((s) => ({ showLinkLocal: !s.showLinkLocal })),
       setListPaneWidth: (px) => set({ listPaneWidth: clampPaneWidth(px) }),
     }),
-    { name: "beacon.settings", version: 1 },
+    {
+      name: "beacon.settings",
+      version: 2,
+      // v1 -> v2 added "system" as the default. v1 always persisted an explicit
+      // "dark" | "light", which passes through untouched so an existing user's
+      // look doesn't change on upgrade; only fresh installs follow the OS.
+      migrate: (persisted) => persisted as SettingsState,
+    },
   ),
 );

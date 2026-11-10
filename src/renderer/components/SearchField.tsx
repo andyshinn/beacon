@@ -33,7 +33,7 @@ export function SearchField() {
               padding: 0,
               background: "none",
               cursor: "pointer",
-              color: "var(--gray-10)",
+              color: "var(--gray-11)",
             }}
           >
             <ClearX />

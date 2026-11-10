@@ -1,8 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { app, BrowserWindow, type Rectangle, screen } from "electron";
+import { app, BrowserWindow, ipcMain, nativeTheme, type Rectangle, screen } from "electron";
 import { updateElectronApp } from "update-electron-app";
+import { IPC } from "../shared/ipc";
+import { type AppearanceIo, applyAppearance, loadAppearance, windowBackground } from "./appearance";
 import { initAutoUpdate } from "./autoUpdate";
 import { installAppMenu } from "./installAppMenu";
 import { registerDiscoveryIpc } from "./ipc/registerDiscoveryIpc";
@@ -15,8 +17,8 @@ declare const MAIN_WINDOW_VITE_NAME: string;
 // import.meta.url correctly whether the main bundle is emitted as ESM or CJS.
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
-function windowStateIo(): WindowStateIo {
-  const file = path.join(app.getPath("userData"), "window-state.json");
+function userDataFile(name: string): AppearanceIo {
+  const file = path.join(app.getPath("userData"), name);
   return {
     read: () => {
       try {
@@ -32,6 +34,12 @@ function windowStateIo(): WindowStateIo {
         /* best-effort: a failed save must never crash the window */
       }
     },
+  };
+}
+
+function windowStateIo(): WindowStateIo {
+  return {
+    ...userDataFile("window-state.json"),
     isOnScreen: (rect: Rectangle) => {
       try {
         const area = screen.getDisplayMatching(rect).workArea;
@@ -57,6 +65,10 @@ function createWindow(): void {
     height: saved.height,
     x: saved.x,
     y: saved.y,
+    // Stay hidden until the first frame is painted, over a background matching the
+    // theme, so launch never shows an empty white (or wrong-theme) window.
+    show: false,
+    backgroundColor: windowBackground(nativeTheme),
     titleBarStyle: isMac ? "hiddenInset" : "default",
     // hiddenInset positions the traffic lights for a standard ~28px title bar;
     // nudge them down/right to sit centered in our taller 46px toolbar
@@ -72,7 +84,17 @@ function createWindow(): void {
       scrollBounce: true,
     },
   });
-  if (saved.isMaximized) win.maximize();
+  let shown = false;
+  const reveal = (): void => {
+    if (shown || win.isDestroyed()) return;
+    shown = true;
+    // maximize() shows the window on Windows/Linux, so it has to wait until now too.
+    if (saved.isMaximized) win.maximize();
+    win.show();
+  };
+  win.once("ready-to-show", reveal);
+  // ready-to-show needs a painted frame; a failed load must not leave the app invisible.
+  win.webContents.once("did-fail-load", reveal);
   manageWindow(win, io);
   // OS-level navigation gestures funnel into the same Chromium history stack the
   // renderer drives via the History API, so each fires the renderer's popstate.
@@ -110,6 +132,13 @@ app.whenReady().then(() => {
   });
   // Auto-update against update.electronjs.org (packaged builds only; no-ops in dev).
   initAutoUpdate({ isPackaged: app.isPackaged, start: () => updateElectronApp() });
+  // Theme the native chrome (menus, dialogs, Windows/Linux title bar) from the
+  // last-known choice before the window exists; the renderer re-sends it on load.
+  const appearanceIo = userDataFile("appearance.json");
+  nativeTheme.themeSource = loadAppearance(appearanceIo);
+  ipcMain.on(IPC.setAppearance, (_e, value: unknown) => {
+    applyAppearance(value, nativeTheme, appearanceIo);
+  });
   createWindow();
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

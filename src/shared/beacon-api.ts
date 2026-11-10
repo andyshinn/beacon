@@ -1,4 +1,12 @@
-import type { DeltaPayload, HealthPayload, MenuCommand, MenuStatePayload, SnapshotPayload, StatusPayload } from "./ipc";
+import type {
+  Appearance,
+  DeltaPayload,
+  HealthPayload,
+  MenuCommand,
+  MenuStatePayload,
+  SnapshotPayload,
+  StatusPayload,
+} from "./ipc";
 
 export type Unsubscribe = () => void;
 
@@ -13,6 +21,7 @@ export interface BeaconApi {
   getSnapshot(): Promise<SnapshotPayload>;
   openExternal(url: string): Promise<void>;
   openLocalNetworkSettings(): Promise<void>;
+  setAppearance(appearance: Appearance): void;
   onMenuCommand(listener: (cmd: MenuCommand) => void): Unsubscribe;
   sendMenuState(state: MenuStatePayload): void;
 }

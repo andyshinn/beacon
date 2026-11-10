@@ -19,7 +19,7 @@ beforeEach(() => {
     onStatus: vi.fn(),
   } as unknown as typeof window.beacon;
   useSettingsStore.setState({ mode: "service", appearance: "dark" });
-  useDiscoveryStore.setState({ query: "", status: { live: true, scanning: false } });
+  useDiscoveryStore.setState({ query: "", status: { live: true, scanning: false }, connected: true });
 });
 
 function renderApp() {
@@ -46,8 +46,14 @@ describe("App shell", () => {
     expect(container.querySelector(".bcn-app")?.getAttribute("data-paused")).toBeNull();
   });
 
+  it("does not mark the app paused before main has reported a status", () => {
+    useDiscoveryStore.setState({ status: { live: false, scanning: false }, connected: false });
+    const { container } = renderApp();
+    expect(container.querySelector(".bcn-app")?.getAttribute("data-paused")).toBeNull();
+  });
+
   it("marks the app paused when discovery is paused", () => {
-    useDiscoveryStore.setState({ status: { live: false, scanning: false } });
+    useDiscoveryStore.setState({ status: { live: false, scanning: false }, connected: true });
     const { container } = renderApp();
     expect(container.querySelector(".bcn-app")?.getAttribute("data-paused")).toBe("true");
   });

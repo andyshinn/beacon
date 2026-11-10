@@ -1,11 +1,18 @@
 /* Bespoke surfaces + fixed "comfortable" density. Values are the nearest Radix
    slate scale steps (slate-1/2/3), pinned as literals rather than var(--slate-*)
    because html/body sit OUTSIDE the Radix <Theme> root and never get its
-   .light/.dark class, so the raw slate tokens aren't in scope there. They
-   default to the dark palette here so html/body stay dark; the .light override
-   below re-defines them on the Theme root so every surface inside the app flips
-   with the appearance toggle. Without it the bespoke surfaces stayed dark while
-   Radix flipped --gray-* to light, leaving dark text on dark panels. */
+   .light/.dark class, so the raw slate tokens aren't in scope there.
+
+   Three layers, each needing both palettes when a surface color is added:
+   1. :root defaults to dark.
+   2. :root flips to light under prefers-color-scheme. Main mirrors the chosen
+      appearance onto nativeTheme.themeSource, which drives that media query, so
+      html/body (visible before React mounts) match the theme with no flash.
+   3. Radix puts `.light`/`.dark` on the <Theme> root; those win inside the app
+      so every surface follows the in-app choice even if the media query lags
+      (the IPC round-trip on toggle) or disagrees (tests, a plain browser).
+      Without this the bespoke surfaces stayed dark while Radix flipped
+      --gray-* to light, leaving dark text on dark panels. */
 :root {
   --app-bg: #111113; /* slate-1 (dark) */
   --surface-panel: #18191b; /* slate-2 (dark) */
@@ -16,15 +23,29 @@
   --row-pad: 10px;
 }
 
-/* Light appearance: Radix puts `.light` (or `.light-theme`) on the <Theme>
-   root, so these cascade to every surface inside the app. Values track the
-   slate light scale used by the --gray-* borders for a cohesive look. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --app-bg: #fcfcfd; /* slate-1 (light) */
+    --surface-panel: #f9f9fb; /* slate-2 (light) */
+    --surface-toolbar: #f0f0f3; /* slate-3 (light) */
+    --surface-menu: #fcfcfd; /* slate-1 (light) */
+  }
+}
+
+.dark,
+.dark-theme {
+  --app-bg: #111113;
+  --surface-panel: #18191b;
+  --surface-toolbar: #212225;
+  --surface-menu: #18191b;
+}
+
 .light,
 .light-theme {
-  --app-bg: #fcfcfd; /* slate-1 (light) */
-  --surface-panel: #f9f9fb; /* slate-2 (light) */
-  --surface-toolbar: #f0f0f3; /* slate-3 (light) */
-  --surface-menu: #fcfcfd; /* slate-1 (light) */
+  --app-bg: #fcfcfd;
+  --surface-panel: #f9f9fb;
+  --surface-toolbar: #f0f0f3;
+  --surface-menu: #fcfcfd;
 }
 
 /* Reset the UA defaults so the app fills the window edge-to-edge. Without this
@@ -105,21 +126,24 @@ body {
   background: var(--surface-toolbar);
   border-top: 1px solid var(--gray-a6);
   font-size: 11.5px;
-  color: var(--gray-10);
+  color: var(--gray-11);
 }
 
-/* Dimmable scroll panels (paused tint). The scroll container itself is a
-   Radix <ScrollArea> (it owns the viewport + the auto-hiding custom scrollbar),
-   so this class only sizes the Root to fill the pane below the header and
-   carries the paused dimming — the panes dim while discovery is paused to mark
-   the list as a frozen snapshot. */
+/* Paused treatment. The scroll container itself is a Radix <ScrollArea> (it
+   owns the viewport + the auto-hiding custom scrollbar), so this class sizes
+   the Root to fill the pane below the header and carries the paused cue: the
+   panes drain to grayscale over a faint hatch to mark the list as a frozen
+   snapshot. Not opacity: dimming the text pushed the small secondary labels
+   below WCAG AA (4.5:1), while grayscale keeps each color's luminance and the
+   --gray-a2 hatch is too faint to move the ratio. */
 .bcn-scroll {
   flex: 1;
   min-height: 0;
-  transition: opacity 0.8s;
+  transition: filter 0.4s;
 }
 .bcn-app[data-paused] .bcn-scroll {
-  opacity: 0.6;
+  filter: grayscale(1);
+  background-image: repeating-linear-gradient(-45deg, transparent 0 7px, var(--gray-a2) 7px 14px);
 }
 /* Radix wraps the viewport's children in a single inner div and sizes it
    `width: fit-content` so content can scroll horizontally. We only scroll
