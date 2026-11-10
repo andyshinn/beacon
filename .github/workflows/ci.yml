@@ -17,19 +17,23 @@ concurrency:
 
 env:
   NODE_VERSION: '24'
+  # package.json has no `packageManager` pin, so pnpm/setup needs an explicit
+  # version. The range tracks the latest 12.x release.
+  PNPM_VERSION: '^12.0.0'
 
 jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # pnpm version comes from the `packageManager` field in package.json.
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      # Installs pnpm and Node, restores the store cache, then runs
+      # `pnpm install --frozen-lockfile` (require-lockfile).
+      - uses: pnpm/setup@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          version: ${{ env.PNPM_VERSION }}
+          runtime: node@${{ env.NODE_VERSION }}
+          cache: true
+          require-lockfile: true
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
@@ -63,13 +67,14 @@ jobs:
       - name: Install Linux build deps
         if: matrix.platform == 'linux'
         run: sudo apt-get update && sudo apt-get install -y rpm fakeroot
-      # pnpm version comes from the `packageManager` field in package.json.
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      # Installs pnpm and Node, restores the store cache, then runs
+      # `pnpm install --frozen-lockfile` (require-lockfile).
+      - uses: pnpm/setup@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          version: ${{ env.PNPM_VERSION }}
+          runtime: node@${{ env.NODE_VERSION }}
+          cache: true
+          require-lockfile: true
 
       # macOS code signing + notarization setup (cert import + notary key).
       - name: Set up macOS signing
