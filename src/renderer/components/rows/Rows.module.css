@@ -23,6 +23,9 @@
   background: var(--accent-a3);
 }
 .childRow {
+  /* The shared rule above sets width: 100%; take the indent back out so the
+     row doesn't stick out past the right edge of the list by its own margin. */
+  width: calc(100% - 24px);
   margin-left: 24px;
   padding: 3px 8px 3px 12px;
 }

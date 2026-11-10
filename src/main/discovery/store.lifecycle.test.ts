@@ -66,3 +66,32 @@ describe("DiscoveryStore.prune", () => {
     expect(store.snapshot()).toEqual({ hosts: [], instances: [] });
   });
 });
+
+describe("DiscoveryStore.markDownMany", () => {
+  it("marks every listed instance down in one delta with the final host state", () => {
+    const store = new DiscoveryStore();
+    seed(store);
+    const delta = store.markDownMany(["mac._airplay._tcp.local.", "mac._ssh._tcp.local."], 2000);
+    expect(delta.upsertInstances!.map((i) => i.present)).toEqual([false, false]);
+    expect(delta.upsertHosts).toHaveLength(1);
+    expect(delta.upsertHosts![0]).toMatchObject({ present: false, departedAt: 2000 });
+  });
+
+  it("skips unknown keys and instances that already departed", () => {
+    const store = new DiscoveryStore();
+    seed(store);
+    store.markDown("mac._airplay._tcp.local.", 2000);
+    expect(store.markDownMany(["mac._airplay._tcp.local.", "nope._http._tcp.local."], 9000)).toEqual({});
+    const inst = store.snapshot().instances.find((i) => i.key === "mac._airplay._tcp.local.")!;
+    expect(inst.departedAt).toBe(2000); // prune grace not restarted
+  });
+});
+
+describe("DiscoveryStore.presentInstanceKeys", () => {
+  it("lists only instances that are still present", () => {
+    const store = new DiscoveryStore();
+    seed(store);
+    store.markDown("mac._airplay._tcp.local.", 2000);
+    expect(store.presentInstanceKeys()).toEqual(["mac._ssh._tcp.local."]);
+  });
+});

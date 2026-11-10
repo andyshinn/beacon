@@ -21,6 +21,8 @@ export interface DiscoveryManagerOptions {
   expireIntervalMs?: number;
   pruneGraceMs?: number;
   scanWindowMs?: number;
+  // How long after a source restart instances get to re-announce before being marked down.
+  reannounceWindowMs?: number;
   now?: () => number;
   healthCheck?: HealthCheck;
 }
@@ -31,6 +33,7 @@ export class DiscoveryManager {
   private readonly expireIntervalMs: number;
   private readonly pruneGraceMs: number;
   private readonly scanWindowMs: number;
+  private readonly reannounceWindowMs: number;
   private readonly now: () => number;
   private readonly healthCheck?: HealthCheck;
 
@@ -38,6 +41,12 @@ export class DiscoveryManager {
   private unsubscribe?: () => void;
   private timer?: ReturnType<typeof setInterval>;
   private scanTimer?: ReturnType<typeof setTimeout>;
+  private requeryTimer?: ReturnType<typeof setTimeout>;
+  private reconcileTimer?: ReturnType<typeof setTimeout>;
+  // Instances that were present when the source last restarted and have not been heard
+  // from since. Tracked by key rather than by comparing lastSeen to the restart time,
+  // because the wall clock can jump across sleep.
+  private unconfirmed = new Set<string>();
   private live = false;
 
   constructor(options: DiscoveryManagerOptions) {
@@ -46,6 +55,7 @@ export class DiscoveryManager {
     this.expireIntervalMs = options.expireIntervalMs ?? 1000;
     this.pruneGraceMs = options.pruneGraceMs ?? 30_000;
     this.scanWindowMs = options.scanWindowMs ?? 1200;
+    this.reannounceWindowMs = options.reannounceWindowMs ?? 5000;
     this.now = options.now ?? Date.now;
     this.healthCheck = options.healthCheck;
   }
@@ -63,6 +73,7 @@ export class DiscoveryManager {
   stop(): void {
     this.stopTimer();
     if (this.scanTimer) clearTimeout(this.scanTimer);
+    this.cancelReconcile();
     this.unsubscribe?.();
     this.unsubscribe = undefined;
     this.source.stop();
@@ -81,8 +92,12 @@ export class DiscoveryManager {
       this.startTimer();
       this.live = true;
       this.healthCheck?.arm(() => this.emitHealth());
+      this.beginReconcile();
     } else {
       this.stopTimer();
+      // Paused freezes the list: nothing may be marked down until the next resume,
+      // which starts a fresh window.
+      this.cancelReconcile();
       this.source.stop();
       this.live = false;
       this.healthCheck?.cancel();
@@ -99,12 +114,40 @@ export class DiscoveryManager {
     if (!this.live) return;
     this.source.stop();
     this.source.start();
+    this.beginReconcile();
     this.scanBlip();
   }
 
   resolve(_key: string): void {
     // v1: a targeted resolve is a network re-query; the engine re-queries all.
     this.source.update();
+  }
+
+  // A restarted source starts with an empty view of the network, so it will never emit
+  // `down` for an instance that left while it was stopped. Give everything we still list
+  // as present one window to re-announce, then treat the silent ones as departed.
+  private beginReconcile(): void {
+    this.cancelReconcile();
+    this.unconfirmed = new Set(this.store.presentInstanceKeys());
+    if (this.unconfirmed.size === 0) return;
+    // The source queries on start; mDNS is lossy, so ask once more mid-window.
+    this.requeryTimer = setTimeout(() => this.source.update(), this.reannounceWindowMs / 2);
+    this.reconcileTimer = setTimeout(() => this.finishReconcile(), this.reannounceWindowMs);
+  }
+
+  private finishReconcile(): void {
+    const stale = this.unconfirmed;
+    this.cancelReconcile();
+    const delta = this.store.markDownMany(stale, this.now());
+    if (hasDelta(delta)) this.onEvent({ type: "delta", delta });
+  }
+
+  private cancelReconcile(): void {
+    if (this.requeryTimer) clearTimeout(this.requeryTimer);
+    if (this.reconcileTimer) clearTimeout(this.reconcileTimer);
+    this.requeryTimer = undefined;
+    this.reconcileTimer = undefined;
+    this.unconfirmed = new Set();
   }
 
   private scanBlip(): void {
@@ -123,6 +166,7 @@ export class DiscoveryManager {
 
   private handleSourceEvent(e: SourceEvent): void {
     if (e.type !== "down") this.healthCheck?.noteActivity();
+    this.unconfirmed.delete(e.type === "down" ? e.key : e.service.key);
     const delta = e.type === "down" ? this.store.markDown(e.key, this.now()) : this.store.upsert(e.service, this.now());
     if (hasDelta(delta)) this.onEvent({ type: "delta", delta });
   }

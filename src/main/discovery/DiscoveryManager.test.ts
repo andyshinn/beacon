@@ -195,4 +195,130 @@ describe("DiscoveryManager", () => {
     expect(source.stopCalls).toBe(stops);
     expect(source.startCalls).toBe(starts);
   });
+
+  describe("reconciling after a source restart", () => {
+    const porch = makeService({ name: "Porch", serviceType: "_http._tcp", hostname: "porch.local." });
+    const den = makeService({ name: "Den", serviceType: "_http._tcp", hostname: "den.local." });
+
+    function setup() {
+      const source = new FakeSource();
+      const { events, onEvent } = collector();
+      const mgr = new DiscoveryManager({
+        source,
+        onEvent,
+        expireIntervalMs: 1000,
+        pruneGraceMs: 30_000,
+        reannounceWindowMs: 5000,
+      });
+      mgr.start();
+      source.emit({ type: "up", service: porch });
+      source.emit({ type: "up", service: den });
+      const instance = (key: string) => mgr.getSnapshot().instances.find((i) => i.key === key);
+      const host = (id: string) => mgr.getSnapshot().hosts.find((h) => h.id === id);
+      return { source, events, mgr, instance, host };
+    }
+
+    const restarts: Array<[string, (mgr: DiscoveryManager) => void]> = [
+      [
+        "pause/resume",
+        (mgr) => {
+          mgr.setLive(false);
+          vi.advanceTimersByTime(60_000);
+          mgr.setLive(true);
+        },
+      ],
+      ["restartSource", (mgr) => mgr.restartSource()],
+    ];
+
+    describe.each(restarts)("%s", (_name, restart) => {
+      it("marks an instance that is not re-announced down after the window, then prunes it", () => {
+        const { source, events, mgr, instance, host } = setup();
+        const firstSeen = instance(den.key)!.firstSeen;
+        restart(mgr);
+        const seenBefore = events.length;
+
+        vi.advanceTimersByTime(1000);
+        source.emit({ type: "up", service: den });
+        vi.advanceTimersByTime(3999);
+        expect(instance(porch.key)!.present).toBe(true);
+
+        vi.advanceTimersByTime(1);
+        const downAt = Date.now();
+        expect(instance(porch.key)).toMatchObject({ present: false, departedAt: downAt });
+        expect(host(instance(porch.key)!.hostId)).toMatchObject({ present: false, departedAt: downAt });
+        // The renderer hears about it as an ordinary delta.
+        const deltas = events.slice(seenBefore).filter((e) => e.type === "delta");
+        expect(deltas.at(-1)).toMatchObject({
+          delta: { upsertInstances: [{ key: porch.key, present: false }], upsertHosts: [{ present: false }] },
+        });
+
+        expect(instance(den.key)).toMatchObject({ present: true, firstSeen });
+
+        vi.advanceTimersByTime(29_000);
+        expect(instance(porch.key)).toBeDefined();
+        vi.advanceTimersByTime(1000);
+        expect(instance(porch.key)).toBeUndefined();
+        expect(mgr.getSnapshot().hosts.map((h) => h.id)).toEqual([instance(den.key)!.hostId]);
+        expect(instance(den.key)).toMatchObject({ present: true, firstSeen });
+      });
+
+      it("re-queries the source part-way through the window", () => {
+        const { source, mgr } = setup();
+        restart(mgr);
+        const before = source.updateCalls;
+        vi.advanceTimersByTime(2500);
+        expect(source.updateCalls).toBe(before + 1);
+      });
+    });
+
+    it("marks nothing down while paused, even if paused mid-window", () => {
+      const { events, mgr, instance } = setup();
+      mgr.restartSource();
+      vi.advanceTimersByTime(1000);
+      mgr.setLive(false);
+      const seenBefore = events.length;
+
+      vi.advanceTimersByTime(120_000);
+
+      expect(instance(porch.key)!.present).toBe(true);
+      expect(instance(den.key)!.present).toBe(true);
+      expect(events.slice(seenBefore).some((e) => e.type === "delta")).toBe(false);
+    });
+
+    it("restarts the window when the source restarts again mid-window", () => {
+      const { source, mgr, instance } = setup();
+      mgr.restartSource();
+      vi.advanceTimersByTime(1000);
+      // Confirmed against the first browser only; the second one starts empty again.
+      source.emit({ type: "up", service: den });
+      vi.advanceTimersByTime(3000);
+      mgr.restartSource();
+
+      vi.advanceTimersByTime(4999);
+      expect(instance(porch.key)!.present).toBe(true);
+      vi.advanceTimersByTime(1);
+      expect(instance(porch.key)!.present).toBe(false);
+      expect(instance(den.key)!.present).toBe(false);
+    });
+
+    it("keeps the departure time of an instance that goes down during the window", () => {
+      const { source, mgr, instance } = setup();
+      mgr.restartSource();
+      vi.advanceTimersByTime(1000);
+      source.emit({ type: "up", service: porch });
+      source.emit({ type: "down", key: porch.key });
+      const departedAt = instance(porch.key)!.departedAt;
+
+      vi.advanceTimersByTime(4000);
+      expect(instance(porch.key)!.departedAt).toBe(departedAt);
+    });
+
+    it("does not mark anything down after stop()", () => {
+      const { mgr, instance } = setup();
+      mgr.restartSource();
+      mgr.stop();
+      vi.advanceTimersByTime(10_000);
+      expect(instance(porch.key)!.present).toBe(true);
+    });
+  });
 });
