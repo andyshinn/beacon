@@ -12,6 +12,7 @@ import { PublisherGitHub } from "@electron-forge/publisher-github";
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { stampUniqueMachoUuid } from "./scripts/machoUuid";
 import { keepInPackage } from "./scripts/packageIgnore";
+import { rpmSpecTemplate } from "./scripts/rpmSpec";
 
 // Single source of truth for the bundle id — also the seed for the per-app Mach-O UUID below.
 const APP_BUNDLE_ID = "as.andyshinn.beacon";
@@ -36,6 +37,14 @@ const osxNotarize =
 const windowsSign = process.env.WINDOWS_SIGN
   ? { hookModulePath: join(process.cwd(), "scripts", "windows-sign.cjs") }
   : undefined;
+
+// rpm >= 4.20 breaks electron-installer-redhat's stock spec (see scripts/rpmSpec.ts). The
+// installer accepts `specTemplate`, but MakerRpm's option types don't declare it yet.
+const rpmOptions = {
+  icon: "build/icon.png",
+  bin: "Beacon",
+  ...(process.platform === "linux" ? { specTemplate: rpmSpecTemplate() } : {}),
+};
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -85,7 +94,7 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({ setupIcon: "build/icon.ico", windowsSign }),
     new MakerZIP({}, ["darwin"]),
-    new MakerRpm({ options: { icon: "build/icon.png", bin: "Beacon" } }),
+    new MakerRpm({ options: rpmOptions }),
     new MakerDeb({ options: { icon: "build/icon.png", bin: "Beacon" } }),
     new MakerDMG({ icon: "build/icon.icns" }),
   ],
