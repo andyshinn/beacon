@@ -121,9 +121,16 @@ body {
 .bcn-app[data-paused] .bcn-scroll {
   opacity: 0.6;
 }
-/* Radix viewport forces `width: fit-content` on its single child to enable
-   horizontal scrolling; we only scroll vertically, so let the content fill the
-   pane width (keeps right-aligned badges / full-width tables flush). */
+/* Radix wraps the viewport's children in a single inner div and sizes it
+   `width: fit-content` so content can scroll horizontally. We only scroll
+   vertically, so pin that wrapper to the viewport width instead. Without this
+   the wrapper grows to the widest row, and `.bcn-scroll-content`'s `width: 100%`
+   resolves against that content-sized parent — rows lay out wider than the
+   pane, right-aligned chips / ports / count pills get clipped, and none of the
+   rows' `min-width: 0` + ellipsis rules ever kick in. */
+.bcn-scroll .rt-ScrollAreaViewport > * {
+  width: 100%;
+}
 .bcn-scroll-content {
   width: 100%;
   box-sizing: border-box;
