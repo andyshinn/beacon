@@ -63,7 +63,7 @@ function createWindow(): void {
     // (.bcn-toolbar height) and align with the design mockup.
     trafficLightPosition: isMac ? { x: 13, y: 16 } : undefined,
     webPreferences: {
-      preload: path.join(dirname, "preload.js"),
+      preload: path.join(dirname, "preload.cjs"),
       contextIsolation: true,
       sandbox: true,
       nodeIntegration: false,
