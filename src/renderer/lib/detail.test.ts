@@ -71,6 +71,16 @@ describe("buildDetail — instance", () => {
     const w = buildDetail({ kind: "inst", id: "web" }, ctx)!;
     expect(w.actions[0]).toMatchObject({ kind: "open", primary: true, value: "http://Mac.local:80" });
   });
+  it("still offers Open by hostname when the host has no addresses yet", () => {
+    const bare = { ...mac, addresses: [] };
+    const w = buildDetail({ kind: "inst", id: "web" }, { ...ctx, hosts: new Map([["mac", bare]]) })!;
+    expect(w.actions[0]).toMatchObject({ kind: "open", value: "http://Mac.local:80" });
+  });
+  it("falls back to the IP when the advertised hostname is not a plain hostname", () => {
+    const evil = { ...mac, hostname: "10.0.0.1@evil.example." };
+    const w = buildDetail({ kind: "inst", id: "web" }, { ...ctx, hosts: new Map([["mac", evil]]) })!;
+    expect(w.actions[0]).toMatchObject({ kind: "open", value: "http://10.0.0.2:80" });
+  });
   it("meta has Port only when > 0 and groups addresses with endpoints", () => {
     expect(d.meta.find((m) => m.label === "Port")?.value).toBe("7000");
     expect(d.addrGroups[0]!.addresses[0]).toMatchObject({
@@ -94,6 +104,9 @@ describe("buildDetail — host", () => {
     expect(d.servicesTitle).toBe("Services advertised (2)");
     expect(d.services.map((s) => s.title)).toEqual(["_airplay._tcp", "_http._tcp"]);
   });
+  it("opens the web service by hostname", () => {
+    expect(d.actions[0]).toMatchObject({ kind: "open", primary: true, value: "http://Mac.local:80" });
+  });
 });
 
 describe("buildDetail — service type", () => {
@@ -112,5 +125,8 @@ describe("buildDetail — ip", () => {
     expect(d.nameMono).toBe(true);
     expect(d.meta.find((m) => m.label === "Scope")?.value).toBe("Private (RFC 1918)");
     expect(d.servicesTitle).toBe("Services on this host (2)");
+  });
+  it("opens the selected IP, not the hostname", () => {
+    expect(d.actions[0]).toMatchObject({ kind: "open", label: "Open http://10.0.0.2", value: "http://10.0.0.2:80" });
   });
 });

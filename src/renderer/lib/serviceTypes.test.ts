@@ -26,6 +26,23 @@ describe("web types + url", () => {
     expect(webHost(null, null)).toBeNull();
     expect(webUrl("_http._tcp", webHost("Porch.local.", null), 8080)).toBe("http://Porch.local:8080");
   });
+  it("rejects hostnames that could rewrite the URL and falls back to the IP", () => {
+    for (const bad of [
+      "10.0.0.1@evil.example.",
+      "evil.example/login#.",
+      "host#frag.local.",
+      "host?q=1.local.",
+      "host:8080.local.",
+      "my host.local.",
+      "host\t.local.",
+      "-bad.local.",
+      "a..b.local.",
+    ]) {
+      expect(webHost(bad, "10.0.0.5")).toBe("10.0.0.5");
+    }
+    expect(webHost("evil.example/x", null)).toBeNull();
+    expect(webHost("my_device-2.local.", "10.0.0.5")).toBe("my_device-2.local");
+  });
   it("scopes web sets per detail kind", () => {
     expect(INSTANCE_WEB_TYPES.has("_prusalink._tcp")).toBe(true);
     expect(HOST_WEB_TYPES.has("_prusalink._tcp")).toBe(false);
