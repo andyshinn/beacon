@@ -58,6 +58,30 @@ export class DiscoveryStore {
     return delta;
   }
 
+  presentInstanceKeys(): string[] {
+    const keys: string[] = [];
+    for (const inst of this.instances.values()) if (inst.present) keys.push(inst.key);
+    return keys;
+  }
+
+  // Marks several instances down as one delta. Already-departed instances are skipped so
+  // their prune grace is not restarted.
+  markDownMany(keys: Iterable<string>, now: number): DiscoveryDelta {
+    const instances: Instance[] = [];
+    const hosts = new Map<string, Host>();
+    for (const key of keys) {
+      if (!this.instances.get(key)?.present) continue;
+      const delta = this.markDown(key, now);
+      instances.push(...(delta.upsertInstances ?? []));
+      // A later markDown for the same host supersedes the earlier host state.
+      for (const host of delta.upsertHosts ?? []) hosts.set(host.id, host);
+    }
+    const delta: DiscoveryDelta = {};
+    if (instances.length) delta.upsertInstances = instances;
+    if (hosts.size) delta.upsertHosts = [...hosts.values()];
+    return delta;
+  }
+
   prune(now: number, graceMs: number): DiscoveryDelta {
     const removeInstanceKeys: string[] = [];
     for (const inst of this.instances.values()) {
