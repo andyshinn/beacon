@@ -69,6 +69,6 @@ describe("DetailPane", () => {
     expect(screen.getByText("Live")).toBeTruthy();
     expect(screen.getByText("Service type")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Open in Browser" }));
-    expect(window.beacon.openExternal).toHaveBeenCalledWith("http://10.0.0.2:80");
+    expect(window.beacon.openExternal).toHaveBeenCalledWith("http://Mac.local:80");
   });
 });

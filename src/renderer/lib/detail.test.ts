@@ -69,7 +69,7 @@ describe("buildDetail — instance", () => {
   });
   it("includes an Open action with a built URL for web types", () => {
     const w = buildDetail({ kind: "inst", id: "web" }, ctx)!;
-    expect(w.actions[0]).toMatchObject({ kind: "open", primary: true, value: "http://10.0.0.2:80" });
+    expect(w.actions[0]).toMatchObject({ kind: "open", primary: true, value: "http://Mac.local:80" });
   });
   it("meta has Port only when > 0 and groups addresses with endpoints", () => {
     expect(d.meta.find((m) => m.label === "Port")?.value).toBe("7000");

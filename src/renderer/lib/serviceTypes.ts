@@ -34,7 +34,17 @@ export function webScheme(type: string): "http" | "https" {
   return type === "_hue._tcp" ? "https" : "http";
 }
 
-export function webUrl(type: string, ip: string | null, port: number): string | null {
+// Host part for a web URL: prefer the mDNS hostname (devices often scope cookies
+// to the name they're reached by), falling back to the IP. The FQDN's trailing
+// dot is stripped so cookies/TLS names match what the device expects.
+export function webHost(hostname: string | null | undefined, ip: string | null): string | null {
+  const name = hostname?.replace(/\.+$/, "");
+  if (name) return name;
   if (!ip) return null;
-  return `${webScheme(type)}://${ip}${port > 0 ? `:${port}` : ""}`;
+  return ip.includes(":") ? `[${ip}]` : ip;
+}
+
+export function webUrl(type: string, host: string | null, port: number): string | null {
+  if (!host) return null;
+  return `${webScheme(type)}://${host}${port > 0 ? `:${port}` : ""}`;
 }
