@@ -17,14 +17,18 @@ concurrency:
 
 env:
   NODE_VERSION: '24'
+  # package.json has no `packageManager` pin, so pnpm/action-setup needs an explicit
+  # version. A bare major tracks the latest 11.x release.
+  PNPM_VERSION: '11'
 
 jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # pnpm version comes from the `packageManager` field in package.json.
       - uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -63,8 +67,9 @@ jobs:
       - name: Install Linux build deps
         if: matrix.platform == 'linux'
         run: sudo apt-get update && sudo apt-get install -y rpm fakeroot
-      # pnpm version comes from the `packageManager` field in package.json.
       - uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
