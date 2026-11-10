@@ -33,6 +33,15 @@ describe("Toolbar", () => {
     renderToolbar();
     expect(screen.getByRole("img", { name: "Beacon" })).toBeTruthy();
   });
+  it("puts the live toggle first and the lockup between the two control groups", () => {
+    const { container } = renderToolbar();
+    const lockup = screen.getByRole("img", { name: "Beacon" });
+    const [leading, trailing] = [lockup.previousElementSibling, lockup.nextElementSibling];
+    expect(leading?.firstElementChild?.textContent).toContain("Live");
+    expect(leading?.contains(screen.getAllByText("Hosts")[0] ?? null)).toBe(true);
+    expect(trailing?.contains(screen.getByPlaceholderText("Search"))).toBe(true);
+    expect(container.contains(lockup)).toBe(true);
+  });
   it("switches lens when a segment is clicked", () => {
     renderToolbar();
     // Radix SegmentedControl renders two label spans per item; click the first.
