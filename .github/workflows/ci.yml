@@ -18,8 +18,8 @@ concurrency:
 env:
   NODE_VERSION: '24'
   # package.json has no `packageManager` pin, so pnpm/setup needs an explicit
-  # version. The range tracks the latest 11.x release.
-  PNPM_VERSION: '^11.0.0'
+  # version. The range tracks the latest 12.x release.
+  PNPM_VERSION: '^12.0.0'
 
 jobs:
   checks:

@@ -8,7 +8,7 @@ Radix Themes, zustand, `bonjour-service`, TypeScript (strict), Vitest, Biome.
 
 ## Commands
 
-Use **pnpm** (v11) and Node 24 (`.nvmrc`). Do not use npm or yarn.
+Use **pnpm** (v12) and Node 24 (`.nvmrc`). Do not use npm or yarn.
 
 ```sh
 pnpm install          # install deps (CI uses --frozen-lockfile)
