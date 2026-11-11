@@ -76,6 +76,10 @@ body {
 
 .bcn-toolbar {
   --toolbar-leading-inset: 0px;
+  --toolbar-trailing-inset: 0px;
+  /* shared by the Live toggle and the Export button so the controls that
+     bookend the toolbar have the same corners */
+  --toolbar-control-radius: 8px;
   flex: 0 0 auto;
   height: 46px;
   display: flex;
@@ -90,9 +94,12 @@ body {
    Safari-like gap before the first control: the lights end at ~72px (~80px on
    macOS 26, whose lights are larger), and with the toolbar's 12px padding and
    the Live toggle's own 4px margin the first control starts at 98px. Consumed
-   by the Toolbar's leading group. */
+   by the Toolbar's leading group.
+   The trailing inset keeps the last control as far from the right window edge
+   (12px padding + 8px = 20px) as the traffic lights sit from the left one. */
 .bcn-app[data-platform="mac"] .bcn-toolbar {
   --toolbar-leading-inset: 82px;
+  --toolbar-trailing-inset: 8px;
 }
 .bcn-toolbar button,
 .bcn-toolbar input,

@@ -1,0 +1,6 @@
+/* Doubled selector: Radix sets the button radius from its size class, and a
+   single module class ties with it on specificity, leaving the winner to
+   stylesheet order. */
+.trigger.trigger {
+  border-radius: var(--toolbar-control-radius, 8px);
+}
