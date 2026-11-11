@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  border-radius: 8px;
+  border-radius: var(--toolbar-control-radius, 8px);
   background: var(--gray-a3);
   border: 1px solid var(--gray-a6);
   color: var(--gray-12);

@@ -1,6 +1,7 @@
 import { Button, DropdownMenu } from "@radix-ui/themes";
 import { exportAs } from "../lib/commands";
 import { Download } from "../lib/icons";
+import styles from "./ExportMenu.module.css";
 
 const OPTIONS: { kind: "json" | "csv" | "txt"; ext: string; label: string }[] = [
   { kind: "json", ext: "JSON", label: "Export as JSON" },
@@ -12,7 +13,7 @@ export function ExportMenu({ defaultOpen }: { defaultOpen?: boolean } = {}) {
   return (
     <DropdownMenu.Root defaultOpen={defaultOpen}>
       <DropdownMenu.Trigger>
-        <Button color="indigo" variant="solid" size="2">
+        <Button color="indigo" variant="solid" size="2" className={styles.trigger}>
           <Download />
           Export
           <DropdownMenu.TriggerIcon />

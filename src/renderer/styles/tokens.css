@@ -77,6 +77,9 @@ body {
 .bcn-toolbar {
   --toolbar-leading-inset: 0px;
   --toolbar-trailing-inset: 0px;
+  /* shared by the Live toggle and the Export button so the controls that
+     bookend the toolbar have the same corners */
+  --toolbar-control-radius: 8px;
   flex: 0 0 auto;
   height: 46px;
   display: flex;
