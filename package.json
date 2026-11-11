@@ -1,7 +1,7 @@
 {
   "name": "beacon",
   "productName": "Beacon",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "mDNS / Bonjour / DNS-SD discovery browser",
   "author": "Andy Shinn",
   "license": "MIT",
